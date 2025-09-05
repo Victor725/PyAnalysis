@@ -1,5 +1,6 @@
 from api.chat import *
 import json
+import asyncio
 
 '''
 class ChatCompletionRequest(BaseModel):
@@ -72,7 +73,7 @@ class PyVulDetector:
         
         request = self.build_req(webapp_promptContent)
         
-        response_webapp = AskLLM(request)
+        response_webapp = asyncio.run(AskLLM(request))
         
         if "No" in response_webapp:
             print("Not web app, skip")
@@ -81,8 +82,9 @@ class PyVulDetector:
         # find out the entries        
         entry_promptContent = '''Your task is to find all entries exposed to users in this web application.
 
-Your answer should only contain a list, the items of which is a dict, containing the following attributes: method, name, parameters.
+Your answer should only contain a list, the items of which is a dict, containing the following attributes: method, name, parameters, file_path.
 "parameters" is a str list, if there's no parameters, return an empty list: [].
+"file_path" is path of file that contains definition of the entry
 
 IMPORTANT: Generate all the content in English.
 
@@ -92,7 +94,7 @@ Remember to ground every claim in the provided source files.'''
 
         request = self.build_req(entry_promptContent)
         
-        response_entry = AskLLM(request)
+        response_entry = asyncio.run(AskLLM(request))
         
         entry_json = json.loads(response_entry)
         

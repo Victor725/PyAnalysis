@@ -61,7 +61,6 @@ async def AskLLM(request_data):
     else:
         logger.warning("GOOGLE_API_KEY not configured")
         
-    # TODO! load .env file to provide keys env
         
         
     try:
@@ -211,14 +210,16 @@ async def AskLLM(request_data):
 
                         # Format context text with file path grouping
                         context_parts = []
+                        file_paths = []
                         for file_path, docs in docs_by_file.items():
                             # Add file header with metadata
                             header = f"## File Path: {file_path}\n\n"
+                            file_paths.append(file_path)
                             # Add document content
                             content = "\n\n".join([doc.text for doc in docs])
 
                             context_parts.append(f"{header}{content}")
-
+                        logger.info(f"LIU: Retrieved files: {file_paths}")
                         # Join all parts with clear separation
                         context_text = "\n\n" + "-" * 10 + "\n\n".join(context_parts)
                     else:

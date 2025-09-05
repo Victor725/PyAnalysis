@@ -62,19 +62,23 @@ def setup_logging(format: str = None):
 
     # Create handlers
     file_handler = RotatingFileHandler(resolved_path, maxBytes=max_bytes, backupCount=backup_count, encoding="utf-8")
-    console_handler = logging.StreamHandler()
+    # LIU: rm console log
+    # console_handler = logging.StreamHandler()
 
     # Set format for both handlers
     formatter = logging.Formatter(log_format)
     file_handler.setFormatter(formatter)
-    console_handler.setFormatter(formatter)
+    # LIU: rm console log
+    # console_handler.setFormatter(formatter)
 
     # Add filter to suppress "Detected file change" messages
     file_handler.addFilter(IgnoreLogChangeDetectedFilter())
-    console_handler.addFilter(IgnoreLogChangeDetectedFilter())
+    # LIU: rm console log
+    # console_handler.addFilter(IgnoreLogChangeDetectedFilter())
 
     # Apply logging configuration
-    logging.basicConfig(level=log_level, handlers=[file_handler, console_handler], force=True)
+    # LIU: rm console log
+    logging.basicConfig(level=log_level, handlers=[file_handler], force=True)
 
     # Log configuration info
     logger = logging.getLogger(__name__)
