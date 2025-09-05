@@ -49,16 +49,23 @@ class ChatCompletionRequest(BaseModel):
     included_dirs: Optional[str] = Field(None, description="Comma-separated list of directories to include exclusively")
     included_files: Optional[str] = Field(None, description="Comma-separated list of file patterns to include exclusively")
 
-async def handle_websocket_chat(websocket: WebSocket):
-    """
-    Handle WebSocket connection for chat completions.
-    This replaces the HTTP streaming endpoint with a WebSocket connection.
-    """
-    await websocket.accept()
 
+
+async def AskLLM(request_data):
+    """
+    Handle chat with llms.
+    """
+    from api.config import GOOGLE_API_KEY
+    if GOOGLE_API_KEY:
+        genai.configure(api_key=GOOGLE_API_KEY)
+    else:
+        logger.warning("GOOGLE_API_KEY not configured")
+        
+    # TODO! load .env file to provide keys env
+        
+        
     try:
         # Receive and parse the request data
-        request_data = await websocket.receive_json()
         request = ChatCompletionRequest(**request_data)
 
         # Check if request contains very large input
@@ -100,34 +107,27 @@ async def handle_websocket_chat(websocket: WebSocket):
         except ValueError as e:
             if "No valid documents with embeddings found" in str(e):
                 logger.error(f"No valid embeddings found: {str(e)}")
-                await websocket.send_text("Error: No valid document embeddings found. This may be due to embedding size inconsistencies or API errors during document processing. Please try again or check your repository content.")
-                await websocket.close()
                 return
             else:
                 logger.error(f"ValueError preparing retriever: {str(e)}")
-                await websocket.send_text(f"Error preparing retriever: {str(e)}")
-                await websocket.close()
                 return
         except Exception as e:
             logger.error(f"Error preparing retriever: {str(e)}")
             # Check for specific embedding-related errors
             if "All embeddings should be of the same size" in str(e):
-                await websocket.send_text("Error: Inconsistent embedding sizes detected. Some documents may have failed to embed properly. Please try again.")
+                logger.error("Error: Inconsistent embedding sizes detected. Some documents may have failed to embed properly. Please try again.")
             else:
-                await websocket.send_text(f"Error preparing retriever: {str(e)}")
-            await websocket.close()
+                logger.error(f"Error preparing retriever: {str(e)}")
             return
 
         # Validate request
         if not request.messages or len(request.messages) == 0:
-            await websocket.send_text("Error: No messages provided")
-            await websocket.close()
+            logger.error("Error: No messages provided")
             return
 
         last_message = request.messages[-1]
         if last_message.role != "user":
-            await websocket.send_text("Error: Last message must be from the user")
-            await websocket.close()
+            logger.error("Error: Last message must be from the user")
             return
 
         # Process previous messages to build conversation history
@@ -434,7 +434,8 @@ This file contains...
             model = OllamaClient()
             model_kwargs = {
                 "model": model_config["model"],
-                "stream": True,
+                # LIU: xxx close stream output
+                "stream": False,
                 "options": {
                     "temperature": model_config["temperature"],
                     "top_p": model_config["top_p"],
@@ -528,7 +529,7 @@ This file contains...
                 model_kwargs=model_kwargs,
                 model_type=ModelType.LLM
             )
-        else:
+        else:               
             # Initialize Google Generative AI model
             model = genai.GenerativeModel(
                 model_name=model_config["model"],
@@ -543,37 +544,49 @@ This file contains...
         try:
             if request.provider == "ollama":
                 # Get the response and handle it properly using the previously created api_kwargs
-                response = await model.acall(api_kwargs=api_kwargs, model_type=ModelType.LLM)
+                logger.info("LIU: calling ollama")
+                response = model.acall(api_kwargs=api_kwargs, model_type=ModelType.LLM)
                 # Handle streaming response from Ollama
-                async for chunk in response:
-                    text = getattr(chunk, 'response', None) or getattr(chunk, 'text', None) or str(chunk)
-                    if text and not text.startswith('model=') and not text.startswith('created_at='):
-                        text = text.replace('<think>', '').replace('</think>', '')
-                        await websocket.send_text(text)
-                # Explicitly close the WebSocket connection after the response is complete
-                await websocket.close()
+                logger.info(f"LIU: ready to parse response: {response}")
+                # async for chunk in response:
+                #     text = getattr(chunk, 'response', None) or getattr(chunk, 'text', None) or str(chunk)
+                #     #logger.info("LIU: response: %s"%text)
+                #     l = text.split()[11]
+                #     begin = l.find("content='") + len("content='")
+                #     end = l.find("',")
+                #     text = l[begin:end]
+                #     logger.info("LIU: response: %s"%text)
+                #     if text and not text.startswith('model=') and not text.startswith('created_at='):
+                #         text = text.replace('<think>', '').replace('</think>', '')
+                #         await websocket.send_text(text)
+                #         logger.info("LIU: trunk sent to websocket")
+                # l = response.to_json()["message"]['content']
+                # begin = l.find("content='") + len("content='")
+                # end = l.find("',")
+                # text = l[begin:end]
+                logger.info(f"LIU: response: {response.message.content}")
+                return response.message.content
+                
             elif request.provider == "openrouter":
                 try:
                     # Get the response and handle it properly using the previously created api_kwargs
                     logger.info("Making OpenRouter API call")
                     response = await model.acall(api_kwargs=api_kwargs, model_type=ModelType.LLM)
                     # Handle streaming response from OpenRouter
+                    return_text = ""
                     async for chunk in response:
-                        await websocket.send_text(chunk)
-                    # Explicitly close the WebSocket connection after the response is complete
-                    await websocket.close()
+                        # await websocket.send_text(chunk)
+                        return_text += chunk
+                    return return_text
                 except Exception as e_openrouter:
                     logger.error(f"Error with OpenRouter API: {str(e_openrouter)}")
-                    error_msg = f"\nError with OpenRouter API: {str(e_openrouter)}\n\nPlease check that you have set the OPENROUTER_API_KEY environment variable with a valid API key."
-                    await websocket.send_text(error_msg)
-                    # Close the WebSocket connection after sending the error message
-                    await websocket.close()
             elif request.provider == "openai":
                 try:
                     # Get the response and handle it properly using the previously created api_kwargs
                     logger.info("Making Openai API call")
                     response = await model.acall(api_kwargs=api_kwargs, model_type=ModelType.LLM)
                     # Handle streaming response from Openai
+                    return_text = ""
                     async for chunk in response:
                         choices = getattr(chunk, "choices", [])
                         if len(choices) > 0:
@@ -581,21 +594,21 @@ This file contains...
                             if delta is not None:
                                 text = getattr(delta, "content", None)
                                 if text is not None:
-                                    await websocket.send_text(text)
-                    # Explicitly close the WebSocket connection after the response is complete
-                    await websocket.close()
+                                    # await websocket.send_text(text)
+                                    return_text += text
+                    return return_text
+                                    
                 except Exception as e_openai:
                     logger.error(f"Error with Openai API: {str(e_openai)}")
                     error_msg = f"\nError with Openai API: {str(e_openai)}\n\nPlease check that you have set the OPENAI_API_KEY environment variable with a valid API key."
-                    await websocket.send_text(error_msg)
                     # Close the WebSocket connection after sending the error message
-                    await websocket.close()
             elif request.provider == "azure":
                 try:
                     # Get the response and handle it properly using the previously created api_kwargs
                     logger.info("Making Azure AI API call")
                     response = await model.acall(api_kwargs=api_kwargs, model_type=ModelType.LLM)
                     # Handle streaming response from Azure AI
+                    return_text = ""
                     async for chunk in response:
                         choices = getattr(chunk, "choices", [])
                         if len(choices) > 0:
@@ -603,24 +616,21 @@ This file contains...
                             if delta is not None:
                                 text = getattr(delta, "content", None)
                                 if text is not None:
-                                    await websocket.send_text(text)
-                    # Explicitly close the WebSocket connection after the response is complete
-                    await websocket.close()
+                                    # await websocket.send_text(text)
+                                    return_text += text
                 except Exception as e_azure:
                     logger.error(f"Error with Azure AI API: {str(e_azure)}")
                     error_msg = f"\nError with Azure AI API: {str(e_azure)}\n\nPlease check that you have set the AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, and AZURE_OPENAI_VERSION environment variables with valid values."
-                    await websocket.send_text(error_msg)
-                    # Close the WebSocket connection after sending the error message
-                    await websocket.close()
             else:
                 # Generate streaming response
                 response = model.generate_content(prompt, stream=True)
                 # Stream the response
+                return_text = ""
                 for chunk in response:
                     if hasattr(chunk, 'text'):
-                        await websocket.send_text(chunk.text)
-                # Explicitly close the WebSocket connection after the response is complete
-                await websocket.close()
+                        # await websocket.send_text(chunk.text)
+                        return_text += chunk.text
+                return return_text
 
         except Exception as e_outer:
             logger.error(f"Error in streaming response: {str(e_outer)}")
@@ -657,11 +667,14 @@ This file contains...
                         fallback_response = await model.acall(api_kwargs=fallback_api_kwargs, model_type=ModelType.LLM)
 
                         # Handle streaming fallback_response from Ollama
+                        return_text = ""
                         async for chunk in fallback_response:
                             text = getattr(chunk, 'response', None) or getattr(chunk, 'text', None) or str(chunk)
                             if text and not text.startswith('model=') and not text.startswith('created_at='):
                                 text = text.replace('<think>', '').replace('</think>', '')
-                                await websocket.send_text(text)
+                                # await websocket.send_text(text)
+                                return_text += text
+                        return return_text
                     elif request.provider == "openrouter":
                         try:
                             # Create new api_kwargs with the simplified prompt
@@ -676,12 +689,15 @@ This file contains...
                             fallback_response = await model.acall(api_kwargs=fallback_api_kwargs, model_type=ModelType.LLM)
 
                             # Handle streaming fallback_response from OpenRouter
+                            return_text = ""
                             async for chunk in fallback_response:
-                                await websocket.send_text(chunk)
+                                # await websocket.send_text(chunk)
+                                return_text += chunk
+                            return return_text
                         except Exception as e_fallback:
                             logger.error(f"Error with OpenRouter API fallback: {str(e_fallback)}")
                             error_msg = f"\nError with OpenRouter API fallback: {str(e_fallback)}\n\nPlease check that you have set the OPENROUTER_API_KEY environment variable with a valid API key."
-                            await websocket.send_text(error_msg)
+                            # await websocket.send_text(error_msg)
                     elif request.provider == "openai":
                         try:
                             # Create new api_kwargs with the simplified prompt
@@ -696,13 +712,16 @@ This file contains...
                             fallback_response = await model.acall(api_kwargs=fallback_api_kwargs, model_type=ModelType.LLM)
 
                             # Handle streaming fallback_response from Openai
+                            return_text = ""
                             async for chunk in fallback_response:
                                 text = chunk if isinstance(chunk, str) else getattr(chunk, 'text', str(chunk))
-                                await websocket.send_text(text)
+                                # await websocket.send_text(text)
+                                return_text += text
+                            return return_text
                         except Exception as e_fallback:
                             logger.error(f"Error with Openai API fallback: {str(e_fallback)}")
                             error_msg = f"\nError with Openai API fallback: {str(e_fallback)}\n\nPlease check that you have set the OPENAI_API_KEY environment variable with a valid API key."
-                            await websocket.send_text(error_msg)
+                            # await websocket.send_text(error_msg)
                     elif request.provider == "azure":
                         try:
                             # Create new api_kwargs with the simplified prompt
@@ -717,6 +736,7 @@ This file contains...
                             fallback_response = await model.acall(api_kwargs=fallback_api_kwargs, model_type=ModelType.LLM)
 
                             # Handle streaming fallback response from Azure AI
+                            return_text = ""
                             async for chunk in fallback_response:
                                 choices = getattr(chunk, "choices", [])
                                 if len(choices) > 0:
@@ -724,11 +744,13 @@ This file contains...
                                     if delta is not None:
                                         text = getattr(delta, "content", None)
                                         if text is not None:
-                                            await websocket.send_text(text)
+                                            # await websocket.send_text(text)
+                                            return_text += text
+                            return return_text
                         except Exception as e_fallback:
                             logger.error(f"Error with Azure AI API fallback: {str(e_fallback)}")
                             error_msg = f"\nError with Azure AI API fallback: {str(e_fallback)}\n\nPlease check that you have set the AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, and AZURE_OPENAI_VERSION environment variables with valid values."
-                            await websocket.send_text(error_msg)
+                            # await websocket.send_text(error_msg)
                     else:
                         # Initialize Google Generative AI model
                         model_config = get_model_config(request.provider, request.model)
@@ -744,26 +766,23 @@ This file contains...
                         # Get streaming response using simplified prompt
                         fallback_response = fallback_model.generate_content(simplified_prompt, stream=True)
                         # Stream the fallback response
+                        return_text = ""
                         for chunk in fallback_response:
                             if hasattr(chunk, 'text'):
-                                await websocket.send_text(chunk.text)
+                                # await websocket.send_text(chunk.text)
+                                return_text += chunk.text
+                        return return_text
                 except Exception as e2:
                     logger.error(f"Error in fallback streaming response: {str(e2)}")
-                    await websocket.send_text(f"\nI apologize, but your request is too large for me to process. Please try a shorter query or break it into smaller parts.")
-                    # Close the WebSocket connection after sending the error message
-                    await websocket.close()
             else:
                 # For other errors, return the error message
-                await websocket.send_text(f"\nError: {error_message}")
-                # Close the WebSocket connection after sending the error message
-                await websocket.close()
+                logger.error(f"\nError: {error_message}")
 
     except WebSocketDisconnect:
         logger.info("WebSocket disconnected")
     except Exception as e:
         logger.error(f"Error in WebSocket handler: {str(e)}")
         try:
-            await websocket.send_text(f"Error: {str(e)}")
-            await websocket.close()
+            logger.error(f"Error: {str(e)}")
         except:
             pass
