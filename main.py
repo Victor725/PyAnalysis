@@ -9,9 +9,9 @@ from pyvuldtc import *
 
 def main():
    
-    path = "./projs/PyWebappTest"
+    # path = "./projs/PyWebappTest"
     # path = "./projs/HttpsServer"
-    # path = "./projs/mlflow"
+    path = "./projs/mlflow"
     
     pyVD = PyVulDetector(path)
     

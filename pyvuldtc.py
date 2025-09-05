@@ -65,7 +65,7 @@ class PyVulDetector:
         
     
     
-    def getEntry(self):
+    async def getEntry(self):
         # Whether it is a web app?
         webapp_promptContent = '''Your task is to determine whether this project is a web application.
         Your answer should be only 'Yes' or 'No'
@@ -73,18 +73,22 @@ class PyVulDetector:
         
         request = self.build_req(webapp_promptContent)
         
-        response_webapp = asyncio.run(AskLLM(request))
+        response_webapp = await AskLLM(request)
         
         if "No" in response_webapp:
             print("Not web app, skip")
             return []
         
         # find out the entries        
-        entry_promptContent = '''Your task is to find all entries exposed to users in this web application.
+        entry_promptContent = '''Your task is to identify all entry points exposed in this web application 
+(e.g., HTTP endpoints such as routes, views, or API methods).
 
-Your answer should only contain a list, the items of which is a dict, containing the following attributes: method, name, parameters, file_path.
-"parameters" is a str list, if there's no parameters, return an empty list: [].
-"file_path" is path of file that contains definition of the entry
+Requirements:
+- Your output must be a JSON-compatible list, where each item is a dict with the following keys:
+  - "method": the HTTP method (e.g., GET, POST, PUT, DELETE).
+  - "name": the route or entry path exposed to the user.
+  - "parameters": a list of parameter names (strings). If there are no parameters, return [].
+  - "file_path": the path of the source file where the entry is defined.
 
 IMPORTANT: Generate all the content in English.
 
@@ -94,7 +98,7 @@ Remember to ground every claim in the provided source files.'''
 
         request = self.build_req(entry_promptContent)
         
-        response_entry = asyncio.run(AskLLM(request))
+        response_entry = await AskLLM(request)
         
         entry_json = json.loads(response_entry)
         
@@ -108,7 +112,7 @@ Remember to ground every claim in the provided source files.'''
     def findVul(self):
         
         # get entries of projs
-        entries = self.getEntry()
-        
+        entries = asyncio.run(self.getEntry())
+        print(entries)
         # get vul in entries
         
