@@ -152,8 +152,10 @@ def read_all_documents(path: str, is_ollama_embedder: bool = None, excluded_dirs
     """
     documents = []
     # File extensions to look for, prioritizing code files
-    code_extensions = [".py", ".js", ".ts", ".java", ".cpp", ".c", ".h", ".hpp", ".go", ".rs",
-                       ".jsx", ".tsx", ".html", ".css", ".php", ".swift", ".cs"]
+    # code_extensions = [".py", ".js", ".ts", ".java", ".cpp", ".c", ".h", ".hpp", ".go", ".rs",
+    #                    ".jsx", ".tsx", ".html", ".css", ".php", ".swift", ".cs"]
+    # LIU: only consider py files
+    code_extensions = [".py"]
     doc_extensions = [".md", ".txt", ".rst", ".json", ".yaml", ".yml"]
 
     # Determine filtering mode: inclusion or exclusion
@@ -293,7 +295,11 @@ def read_all_documents(path: str, is_ollama_embedder: bool = None, excluded_dirs
                         and not relative_path.startswith("app_")
                         and "test" not in relative_path.lower()
                     )
-
+                    
+                    # LIU: exclude files that are not for implementation
+                    if not is_implementation:
+                        continue
+                    
                     # Check token count
                     token_count = count_tokens(content, is_ollama_embedder)
                     if token_count > MAX_EMBEDDING_TOKENS * 10:
@@ -316,38 +322,39 @@ def read_all_documents(path: str, is_ollama_embedder: bool = None, excluded_dirs
                 logger.error(f"Error reading {file_path}: {e}")
 
     # Then process documentation files
-    for ext in doc_extensions:
-        files = glob.glob(f"{path}/**/*{ext}", recursive=True)
-        for file_path in files:
-            # Check if file should be processed based on inclusion/exclusion rules
-            if not should_process_file(file_path, use_inclusion_mode, included_dirs, included_files, excluded_dirs, excluded_files):
-                continue
+    # LIU: exclude documentations
+    # for ext in doc_extensions:
+    #     files = glob.glob(f"{path}/**/*{ext}", recursive=True)
+    #     for file_path in files:
+    #         # Check if file should be processed based on inclusion/exclusion rules
+    #         if not should_process_file(file_path, use_inclusion_mode, included_dirs, included_files, excluded_dirs, excluded_files):
+    #             continue
 
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                    relative_path = os.path.relpath(file_path, path)
+    #         try:
+    #             with open(file_path, "r", encoding="utf-8") as f:
+    #                 content = f.read()
+    #                 relative_path = os.path.relpath(file_path, path)
 
-                    # Check token count
-                    token_count = count_tokens(content, is_ollama_embedder)
-                    if token_count > MAX_EMBEDDING_TOKENS:
-                        logger.warning(f"Skipping large file {relative_path}: Token count ({token_count}) exceeds limit")
-                        continue
+    #                 # Check token count
+    #                 token_count = count_tokens(content, is_ollama_embedder)
+    #                 if token_count > MAX_EMBEDDING_TOKENS:
+    #                     logger.warning(f"Skipping large file {relative_path}: Token count ({token_count}) exceeds limit")
+    #                     continue
 
-                    doc = Document(
-                        text=content,
-                        meta_data={
-                            "file_path": relative_path,
-                            "type": ext[1:],
-                            "is_code": False,
-                            "is_implementation": False,
-                            "title": relative_path,
-                            "token_count": token_count,
-                        },
-                    )
-                    documents.append(doc)
-            except Exception as e:
-                logger.error(f"Error reading {file_path}: {e}")
+    #                 doc = Document(
+    #                     text=content,
+    #                     meta_data={
+    #                         "file_path": relative_path,
+    #                         "type": ext[1:],
+    #                         "is_code": False,
+    #                         "is_implementation": False,
+    #                         "title": relative_path,
+    #                         "token_count": token_count,
+    #                     },
+    #                 )
+    #                 documents.append(doc)
+    #         except Exception as e:
+    #             logger.error(f"Error reading {file_path}: {e}")
 
     logger.info(f"Found {len(documents)} documents")
     return documents

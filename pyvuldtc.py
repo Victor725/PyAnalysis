@@ -67,21 +67,21 @@ class PyVulDetector:
     
     async def getEntry(self):
         # Whether it is a web app?
-        webapp_promptContent = '''Your task is to determine whether this project is a web application.
-        Your answer should be only 'Yes' or 'No'
-        '''
+        # webapp_promptContent = '''Your task is to determine whether this project is a web application.
+        # Your answer should be only 'Yes' or 'No'
+        # '''
         
-        request = self.build_req(webapp_promptContent)
+        # request = self.build_req(webapp_promptContent)
         
-        response_webapp = await AskLLM(request)
+        # response_webapp = await AskLLM(request)
         
-        if "No" in response_webapp:
-            print("Not web app, skip")
-            return []
+        # if "No" in response_webapp:
+        #     print("Not web app, skip")
+        #     return []
         
         # find out the entries        
         entry_promptContent = '''Your task is to identify all entry points exposed in this web application 
-(e.g., HTTP endpoints such as routes, views, or API methods).
+(e.g., HTTP endpoints such as routes, views, url, or API methods).
 
 Requirements:
 - Your output must be a JSON-compatible list, where each item is a dict with the following keys:
@@ -94,16 +94,21 @@ IMPORTANT: Generate all the content in English.
 
 You will be given content of related source files.
 
-Remember to ground every claim in the provided source files.'''
+Remember to ground every claim in the provided source files.
+'''
 
+        # entry_promptContent = '''Can you give examples of code that register urls as entry points of this project? 
+        # As many the types of registering as possible'''
+        
         request = self.build_req(entry_promptContent)
         
         response_entry = await AskLLM(request)
         
-        entry_json = json.loads(response_entry)
+        entry_json = response_entry
+        # entry_json = json.loads(response_entry)
         
-        if len(entry_json) == 0:
-            print("No entries found")
+        # if len(entry_json) == 0:
+        #     print("No entries found")
         
         return entry_json
 

@@ -412,7 +412,7 @@ IMPORTANT FORMATTING RULES:
                 logger.error(f"Sample embedding sizes: {', '.join(sizes)}")
             raise
 
-    def call(self, query: str, language: str = "en") -> Tuple[List]:
+    def call(self, query: str, language: str = "en", top_k = 5) -> Tuple[List]:
         """
         Process a query using RAG.
 
@@ -423,7 +423,7 @@ IMPORTANT FORMATTING RULES:
             Tuple of (RAGAnswer, retrieved_documents)
         """
         try:
-            retrieved_documents = self.retriever(query)
+            retrieved_documents = self.retriever(query, top_k)
 
             # Fill in the documents
             retrieved_documents[0].documents = [

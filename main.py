@@ -13,7 +13,7 @@ def main():
     # path = "./projs/HttpsServer"
     path = "./projs/mlflow"
     
-    pyVD = PyVulDetector(path)
+    pyVD = PyVulDetector(path)#, model="gpt-5")
     
     reports = pyVD.findVul()
     

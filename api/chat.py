@@ -193,7 +193,8 @@ async def AskLLM(request_data):
                 # Try to perform RAG retrieval
                 try:
                     # This will use the actual RAG implementation
-                    retrieved_documents = request_rag(rag_query, language=request.language)
+                    top_k = 20
+                    retrieved_documents = request_rag(rag_query, top_k = top_k, language=request.language)
 
                     if retrieved_documents and retrieved_documents[0].documents:
                         # Format context for the prompt in a more structured way
