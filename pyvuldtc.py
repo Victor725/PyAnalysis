@@ -1,6 +1,10 @@
 from api.chat import *
 import json
 import asyncio
+from frameworks import *
+import re
+from api.data_pipeline import read_all_documents
+from adalflow.core.types import Document
 
 '''
 class ChatCompletionRequest(BaseModel):
@@ -79,26 +83,57 @@ class PyVulDetector:
         #     print("Not web app, skip")
         #     return []
         
-        # find out the entries        
+        
+        self.documents = read_all_documents(self.path)
+
+        
+        self.entry_files = []  # items: {path: str, import:[]}
+        # find files containing entries
+        for framework in frameworks.keys():
+            regx = re.compile(frameworks[framework]['regx'])
+            for document in self.documents:
+                document:Document
+                content = document.text
+                if regx.search(content):
+                    entry_file = {
+                        'path': document.meta_data["file_path"]
+                    }
+                    self.entry_files.append(entry_file)
+        
+        
+        # return self.entry_files
+        # build import graph
+        
+        
+            
+        # for each file, find 'related' files, send to LLM to determine entries defined
+                
         entry_promptContent = '''Your task is to identify all entry points exposed in this web application 
-(e.g., HTTP endpoints such as routes, views, url, or API methods).
+# (e.g., HTTP endpoints such as routes, views, url, or API methods).
 
-Requirements:
-- Your output must be a JSON-compatible list, where each item is a dict with the following keys:
-  - "method": the HTTP method (e.g., GET, POST, PUT, DELETE).
-  - "name": the route or entry path exposed to the user.
-  - "parameters": a list of parameter names (strings). If there are no parameters, return [].
-  - "file_path": the path of the source file where the entry is defined.
+# Requirements:
+# - Your output must be a JSON-compatible list, where each item is a dict with the following keys:
+#   - "method": the HTTP method (e.g., GET, POST, PUT, DELETE).
+#   - "name": the route or entry path exposed to the user.
+#   - "parameters": a list of parameter names (strings). If there are no parameters, return [].
+#   - "file_path": the path of the source file where the entry is defined.
 
-IMPORTANT: Generate all the content in English.
+# Here are some common examples:
 
-You will be given content of related source files.
+# Flask:
+#     @app.route("/login", methods=["GET", "POST"])
+#     def login():
+#         ...
 
-Remember to ground every claim in the provided source files.
-'''
+#     app.add_url_rule("/logout", "logout", logout_handler)
 
-        # entry_promptContent = '''Can you give examples of code that register urls as entry points of this project? 
-        # As many the types of registering as possible'''
+# IMPORTANT: Generate all the content in English.
+
+# You will be given content of related source files.
+
+# Remember to ground every claim in the provided source files.
+# '''
+            
         
         request = self.build_req(entry_promptContent)
         
