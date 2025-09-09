@@ -5,6 +5,8 @@ from frameworks import *
 import re
 from api.data_pipeline import read_all_documents
 from adalflow.core.types import Document
+from import_graph import build_graph
+from pathlib import Path
 
 '''
 class ChatCompletionRequest(BaseModel):
@@ -34,7 +36,7 @@ class PyVulDetector:
         self, path, provider="openai", model = "gpt-4o",
         language = "en", #(e.g., 'en', 'ja', 'zh', 'es', 'kr', 'vi')
         ):
-        self.path = path
+        self.path = str(Path(path).resolve())
         self.provider = provider
         self.type = (
             "bitbucket" if "bitbucket.org" in path else
@@ -83,11 +85,12 @@ class PyVulDetector:
         #     print("Not web app, skip")
         #     return []
         
-        
         self.documents = read_all_documents(self.path)
-
         
-        self.entry_files = []  # items: {path: str, import:[]}
+        # build import graph
+        import_graph = build_graph(self.path, self.documents)
+
+        self.entry_files = []
         # find files containing entries
         for framework in frameworks.keys():
             regx = re.compile(frameworks[framework]['regx'])
@@ -95,49 +98,64 @@ class PyVulDetector:
                 document:Document
                 content = document.text
                 if regx.search(content):
-                    entry_file = {
-                        'path': document.meta_data["file_path"]
-                    }
-                    self.entry_files.append(entry_file)
-        
-        
-        # return self.entry_files
-        # build import graph
-        
-        
-            
+                    rel_path = document.meta_data["file_path"]
+                    self.entry_files.append(rel_path)
+                    
         # for each file, find 'related' files, send to LLM to determine entries defined
-                
-        entry_promptContent = '''Your task is to identify all entry points exposed in this web application 
-# (e.g., HTTP endpoints such as routes, views, url, or API methods).
-
-# Requirements:
-# - Your output must be a JSON-compatible list, where each item is a dict with the following keys:
-#   - "method": the HTTP method (e.g., GET, POST, PUT, DELETE).
-#   - "name": the route or entry path exposed to the user.
-#   - "parameters": a list of parameter names (strings). If there are no parameters, return [].
-#   - "file_path": the path of the source file where the entry is defined.
-
-# Here are some common examples:
-
-# Flask:
-#     @app.route("/login", methods=["GET", "POST"])
-#     def login():
-#         ...
-
-#     app.add_url_rule("/logout", "logout", logout_handler)
-
-# IMPORTANT: Generate all the content in English.
-
-# You will be given content of related source files.
-
-# Remember to ground every claim in the provided source files.
-# '''
+        # self.entry_files: rel_paths
+        for entry_file in self.entry_files:
+            rel_path = Path(entry_file)
+            abs_path = str((Path(self.path) / rel_path).resolve())
             
+            target_file_content = ""
+            with open(abs_path) as f:
+                target_file_content = f.read()
+            
+            # get related files, depth = 1
+            predecessors = list(import_graph.predecessors(abs_path))
+            successors = list(import_graph.successors(abs_path))
+            related_files = list(set(predecessors + successors))
+            
+            context_parts = []
+            for related_file in related_files:
+                header = f"## File Path: {entry_file}\n\n"
+                content = ""
+                with open(related_file) as f:
+                    content = f.read()
+                context_parts.append(f"{header}{content}")
+            
+            context_text = "\n\n" + "-" * 10 + "\n\n".join(context_parts)
         
-        request = self.build_req(entry_promptContent)
+            entry_promptContent = f'''Your task is to identify all entry points exposed in the following source code
+(e.g., HTTP endpoints such as routes, views, url, or API methods).
+
+Requirements:
+- Your output should not contain any other content, except for a JSON-compatible list, where each item is a dict with the following keys:
+  - "method": the HTTP method (e.g., GET, POST, PUT, DELETE).
+  - "name": the route or entry path exposed to the user.
+  - "parameters": a list of parameter names (strings). If there are no parameters, return [].
+  - "file_path": the path of the source file where the entry is defined.
+
+Here is content of the file:
+
+{target_file_content}
+
+IMPORTANT: Generate all the content in English.
+
+Here are other files you can refer to:
+
+{context_text}
+
+Remember to ground every claim in the provided source files.
+You NEVER start responses with markdown headers or code fences.
+'''
+            
+            request = self.build_req(entry_promptContent)
+            
+            response_entry = await AskLLM_raw(request)
+
+            print(response_entry)
         
-        response_entry = await AskLLM(request)
         
         entry_json = response_entry
         # entry_json = json.loads(response_entry)
