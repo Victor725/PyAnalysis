@@ -120,34 +120,37 @@ class PyVulDetector:
             for related_file in related_files:
                 header = f"## File Path: {entry_file}\n\n"
                 content = ""
-                with open(related_file) as f:
+                with open(related_file, encoding='utf-8') as f:
                     content = f.read()
                 context_parts.append(f"{header}{content}")
             
             context_text = "\n\n" + "-" * 10 + "\n\n".join(context_parts)
         
-            entry_promptContent = f'''Your task is to identify all entry points exposed in the following source code
-(e.g., HTTP endpoints such as routes, views, url, or API methods).
+            entry_promptContent = f'''You are an expert code analyst. 
+Your task is to identify all entry points exposed in the following source code (e.g., HTTP endpoints such as routes, views, url, or API methods).
+You provide direct, concise, and accurate information about source code.
+
+CRITICAL:
+You NEVER start responses with markdown headers or code fences.
+
+IMPORTANT: Generate all the content in English.
+
+Remember to ground every claim in the provided source files.
 
 Requirements:
 - Your output should not contain any other content, except for a JSON-compatible list, where each item is a dict with the following keys:
   - "method": the HTTP method (e.g., GET, POST, PUT, DELETE).
   - "name": the route or entry path exposed to the user.
-  - "parameters": a list of parameter names (strings). If there are no parameters, return [].
+  - "parameters": a list of parameter names (strings). If there are no parameters, return []. Do not skip parameters if present.
   - "file_path": the path of the source file where the entry is defined.
 
 Here is content of the file:
 
 {target_file_content}
 
-IMPORTANT: Generate all the content in English.
-
 Here are other files you can refer to:
 
 {context_text}
-
-Remember to ground every claim in the provided source files.
-You NEVER start responses with markdown headers or code fences.
 '''
             
             request = self.build_req(entry_promptContent)
