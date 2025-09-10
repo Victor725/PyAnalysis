@@ -12,6 +12,7 @@ def main():
     # path = "./projs/PyWebappTest"
     # path = "./projs/HttpsServer"
     path = "./projs/mlflow"
+    # path = "./projs/Synthetic_servers"
     
     pyVD = PyVulDetector(path)#, model="gpt-5")
     

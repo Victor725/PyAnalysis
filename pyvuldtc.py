@@ -70,6 +70,18 @@ class PyVulDetector:
         return request        
         
     
+    def dedup(self):
+        seen = set()
+        unique_entries = []
+        
+        for entry in self.entries:
+            key = json.dumps(entry, sort_keys=True)
+            if key not in seen:
+                seen.add(key)
+                unique_entries.append(entry)
+                
+        self.entries = unique_entries
+    
     
     async def getEntry(self):
         # Whether it is a web app?
@@ -100,10 +112,15 @@ class PyVulDetector:
                 if regx.search(content):
                     rel_path = document.meta_data["file_path"]
                     self.entry_files.append(rel_path)
-                    
+        
+        
+        self.entries = []     
         # for each file, find 'related' files, send to LLM to determine entries defined
         # self.entry_files: rel_paths
         for entry_file in self.entry_files:
+            
+            print("Processing entry file: %s"%entry_file)
+            
             rel_path = Path(entry_file)
             abs_path = str((Path(self.path) / rel_path).resolve())
             
@@ -125,7 +142,8 @@ class PyVulDetector:
                 context_parts.append(f"{header}{content}")
             
             context_text = "\n\n" + "-" * 10 + "\n\n".join(context_parts)
-        
+
+            # do not need parameter
             entry_promptContent = f'''You are an expert code analyst. 
 Your task is to identify all entry points exposed in the following source code (e.g., HTTP endpoints such as routes, views, url, or API methods).
 You provide direct, concise, and accurate information about source code.
@@ -141,10 +159,11 @@ Requirements:
 - Your output should not contain any other content, except for a JSON-compatible list, where each item is a dict with the following keys:
   - "method": the HTTP method (e.g., GET, POST, PUT, DELETE).
   - "name": the route or entry path exposed to the user.
-  - "parameters": a list of parameter names (strings). If there are no parameters, return []. Do not skip parameters if present.
-  - "file_path": the path of the source file where the entry is defined.
+  - "file_path": file path where the entry is defined.
 
 Here is content of the file:
+
+## File Path: {entry_file}
 
 {target_file_content}
 
@@ -157,18 +176,17 @@ Here are other files you can refer to:
             
             response_entry = await AskLLM_raw(request)
 
-            print(response_entry)
+            # print(response_entry)
+            
+            json_response = json.loads(response_entry)
+            self.entries.extend(json_response)
         
+        # deduplication
+        self.dedup()
         
-        entry_json = response_entry
-        # entry_json = json.loads(response_entry)
-        
-        # if len(entry_json) == 0:
-        #     print("No entries found")
-        
-        return entry_json
+        return self.entries
 
-       
+
 
     def findVul(self):
         
