@@ -8,6 +8,31 @@ from adalflow.core.types import Document
 from import_graph import build_graph
 from pathlib import Path
 
+import io
+import tokenize
+
+def remove_comments_and_docstrings(source: str) -> str:
+    io_obj = io.StringIO(source)
+    out_tokens = []
+    
+    for tok in tokenize.generate_tokens(io_obj.readline):
+        token_type, token_string, start, end, line = tok
+        
+        if token_type == tokenize.COMMENT:
+            continue
+        
+        # 跳过三引号字符串（多行的 STRING，且出现在定义外部时多半是注释用途）
+        if token_type == tokenize.STRING:
+            if token_string.startswith('"""') or \
+                token_string.startswith("'''") or \
+                token_string.startswith('"') or \
+                token_string.startswith("'"):
+                continue
+        
+        out_tokens.append(token_string)
+    
+    return "".join(out_tokens)
+
 '''
 class ChatCompletionRequest(BaseModel):
     """
@@ -109,6 +134,10 @@ class PyVulDetector:
             for document in self.documents:
                 document:Document
                 content = document.text
+                
+                # before matching, delete all comments and strings in the code
+                content = remove_comments_and_docstrings(content)
+                
                 if regx.search(content):
                     rel_path = document.meta_data["file_path"]
                     self.entry_files.append(rel_path)
@@ -125,7 +154,7 @@ class PyVulDetector:
             abs_path = str((Path(self.path) / rel_path).resolve())
             
             target_file_content = ""
-            with open(abs_path) as f:
+            with open(abs_path, encoding="utf-8") as f:
                 target_file_content = f.read()
             
             # get related files, depth = 1
