@@ -432,6 +432,100 @@ async def AskLLM_raw(request_data):
             pass
 
 
+async def rag_search(request_data):
+    request = ChatCompletionRequest(**request_data)
+    try:
+        request_rag = RAG(provider=request.provider, model=request.model)
+
+        # Extract custom file filter parameters if provided
+        excluded_dirs = None
+        excluded_files = None
+        included_dirs = None
+        included_files = None
+
+        if request.excluded_dirs:
+            excluded_dirs = [unquote(dir_path) for dir_path in request.excluded_dirs.split('\n') if dir_path.strip()]
+            logger.info(f"Using custom excluded directories: {excluded_dirs}")
+        if request.excluded_files:
+            excluded_files = [unquote(file_pattern) for file_pattern in request.excluded_files.split('\n') if file_pattern.strip()]
+            logger.info(f"Using custom excluded files: {excluded_files}")
+        if request.included_dirs:
+            included_dirs = [unquote(dir_path) for dir_path in request.included_dirs.split('\n') if dir_path.strip()]
+            logger.info(f"Using custom included directories: {included_dirs}")
+        if request.included_files:
+            included_files = [unquote(file_pattern) for file_pattern in request.included_files.split('\n') if file_pattern.strip()]
+            logger.info(f"Using custom included files: {included_files}")
+
+        request_rag.prepare_retriever(request.repo_url, request.type, request.token, excluded_dirs, excluded_files, included_dirs, included_files)
+        logger.info(f"Retriever prepared for {request.repo_url}")
+    except ValueError as e:
+        if "No valid documents with embeddings found" in str(e):
+            logger.error(f"No valid embeddings found: {str(e)}")
+            return
+        else:
+            logger.error(f"ValueError preparing retriever: {str(e)}")
+            return
+    except Exception as e:
+        logger.error(f"Error preparing retriever: {str(e)}")
+        # Check for specific embedding-related errors
+        if "All embeddings should be of the same size" in str(e):
+            logger.error("Error: Inconsistent embedding sizes detected. Some documents may have failed to embed properly. Please try again.")
+        else:
+            logger.error(f"Error preparing retriever: {str(e)}")
+        return
+
+    last_message = request.messages[-1]
+    if last_message.role != "user":
+        logger.error("Error: Last message must be from the user")
+        return
+    
+    rag_query = last_message.content
+    retrieved_documents = None
+    
+    # Try to perform RAG retrieval
+    try:
+        # This will use the actual RAG implementation
+        top_k = 20
+        retrieved_documents = request_rag(rag_query, top_k = top_k, language=request.language)
+
+        if retrieved_documents and retrieved_documents[0].documents:
+            # Format context for the prompt in a more structured way
+            documents = retrieved_documents[0].documents
+            logger.info(f"Retrieved {len(documents)} documents")
+
+            # Group documents by file path
+            docs_by_file = {}
+            for doc in documents:
+                file_path = doc.meta_data.get('file_path', 'unknown')
+                if file_path not in docs_by_file:
+                    docs_by_file[file_path] = []
+                docs_by_file[file_path].append(doc)
+
+            # Format context text with file path grouping
+            context_parts = []
+            file_paths = []
+            for file_path, docs in docs_by_file.items():
+                # Add file header with metadata
+                header = f"## File Path: {file_path}\n\n"
+                file_paths.append(file_path)
+                # Add document content
+                content = "\n\n".join([doc.text for doc in docs])
+
+                context_parts.append(f"{header}{content}")
+            logger.info(f"LIU: Retrieved files: {file_paths}")
+            # Join all parts with clear separation
+            context_text = "\n\n" + "-" * 10 + "\n\n".join(context_parts)
+            print(context_text)
+        else:
+            logger.warning("No documents retrieved from RAG")
+    except Exception as e:
+        logger.error(f"Error in RAG retrieval: {str(e)}")
+        # Continue without RAG if there's an error
+
+    
+    
+
+
 async def AskLLM(request_data):
     """
     Handle chat with llms.

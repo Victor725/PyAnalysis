@@ -10,6 +10,8 @@ from pathlib import Path
 
 import io
 import tokenize
+import ast
+
 
 def remove_comments_and_docstrings(source: str) -> str:
     io_obj = io.StringIO(source)
@@ -32,6 +34,67 @@ def remove_comments_and_docstrings(source: str) -> str:
         out_tokens.append(token_string)
     
     return "".join(out_tokens)
+
+
+# format scope using line number in source code
+def getFunc(code, line_num):
+    Ast = None
+    try:
+        Ast = ast.parse(code)  # Ast is a instance of ast.Module
+    except:
+        # Ast = ast.parse(code, feature_version=(2,5))
+        return ""
+    
+    current = Ast
+    scope = []
+    
+    def find_body(node):
+        try:
+            body = node.body
+        except:
+            return None
+        
+        # handle 'except'
+        if isinstance(node, ast.Try) == True:
+            body += node.handlers
+            body += node.orelse
+            body += node.finalbody
+        
+        for n in body:
+            if line_num >= n.lineno and line_num <= n.end_lineno: # line_num lie in the node
+                if isinstance(n, ast.ClassDef) or isinstance(n, ast.FunctionDef) or isinstance(n, ast.AsyncFunctionDef):
+                    # fine body that contains line_num
+                    scope.append(n.name)
+                return n
+        return None
+    
+    while(True):
+        current = find_body(current)
+        if current == None:
+            return ".".join(scope)
+
+
+def find_by_decorator(regx:re.Pattern, code):
+    
+    scopes = []
+    
+    # find line number of the decorated function
+    targeted_locations = []
+    tree = ast.parse(code)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
+            for deco in node.decorator_list:
+                decorator = '@' + ast.get_source_segment(code, deco)
+                if regx.search(decorator):
+                    targeted_locations.append(node.lineno)
+    
+    # get scope information using getFunc()
+    for location in targeted_locations:
+        scopes.append(getFunc(code, location))
+    
+    return scopes
+    
+
 
 '''
 class ChatCompletionRequest(BaseModel):
@@ -72,7 +135,6 @@ class PyVulDetector:
         self.model = model
         self.language = language
 
-        
     
     def build_req(self, prompt):
         request = {}
@@ -95,7 +157,7 @@ class PyVulDetector:
         return request        
         
     
-    def dedup(self):
+    def dedup_entries(self):
         seen = set()
         unique_entries = []
         
@@ -123,95 +185,37 @@ class PyVulDetector:
         #     return []
         
         self.documents = read_all_documents(self.path)
-        
-        # build import graph
-        import_graph = build_graph(self.path, self.documents)
 
-        self.entry_files = []
-        # find files containing entries
+ 
+        self.entries = []    # {file_path, scope}
         for framework in frameworks.keys():
-            regx = re.compile(frameworks[framework]['regx'])
-            for document in self.documents:
-                document:Document
-                content = document.text
-                
-                # before matching, delete all comments and strings in the code
-                content = remove_comments_and_docstrings(content)
-                
-                if regx.search(content):
-                    rel_path = document.meta_data["file_path"]
-                    self.entry_files.append(rel_path)
-        
-        
-        self.entries = []     
-        # for each file, find 'related' files, send to LLM to determine entries defined
-        # self.entry_files: rel_paths
-        for entry_file in self.entry_files:
-            
-            print("Processing entry file: %s"%entry_file)
-            
-            rel_path = Path(entry_file)
-            abs_path = str((Path(self.path) / rel_path).resolve())
-            
-            target_file_content = ""
-            with open(abs_path, encoding="utf-8") as f:
-                target_file_content = f.read()
-            
-            # get related files, depth = 1
-            predecessors = list(import_graph.predecessors(abs_path))
-            successors = list(import_graph.successors(abs_path))
-            related_files = list(set(predecessors + successors))
-            
-            context_parts = []
-            for related_file in related_files:
-                header = f"## File Path: {entry_file}\n\n"
-                content = ""
-                with open(related_file, encoding='utf-8') as f:
-                    content = f.read()
-                context_parts.append(f"{header}{content}")
-            
-            context_text = "\n\n" + "-" * 10 + "\n\n".join(context_parts)
-
-            # do not need parameter
-            entry_promptContent = f'''You are an expert code analyst. 
-Your task is to identify all entry points exposed in the following source code (e.g., HTTP endpoints such as routes, views, url, or API methods).
-You provide direct, concise, and accurate information about source code.
-
-CRITICAL:
-You NEVER start responses with markdown headers or code fences.
-
-IMPORTANT: Generate all the content in English.
-
-Remember to ground every claim in the provided source files.
-
-Requirements:
-- Your output should not contain any other content, except for a JSON-compatible list, where each item is a dict with the following keys:
-  - "method": the HTTP method (e.g., GET, POST, PUT, DELETE).
-  - "name": the route or entry path exposed to the user.
-  - "file_path": file path where the entry is defined.
-
-Here is content of the file:
-
-## File Path: {entry_file}
-
-{target_file_content}
-
-Here are other files you can refer to:
-
-{context_text}
-'''
-            
-            request = self.build_req(entry_promptContent)
-            
-            response_entry = await AskLLM_raw(request)
-
-            # print(response_entry)
-            
-            json_response = json.loads(response_entry)
-            self.entries.extend(json_response)
+            regxs = frameworks[framework]['regx']
+            # regxs[0]: register using decorator
+            # regxs[1]: register with func call
+            for i, regx_str in enumerate(regxs):
+                regx = re.compile(regx_str)
+                for document in self.documents:
+                    document:Document                    
+                    # before matching, delete all comments and strings in the code
+                    content = remove_comments_and_docstrings(document.text)
+                    
+                    if regx.search(content):
+                        # rel_path = document.meta_data["file_path"]
+                        # self.entry_files.append(rel_path)
+                        if i == 0: # handle decorator register
+                            # funcs: list of function scopes
+                            funcs = find_by_decorator(regx, document.text)
+                            for func in funcs:
+                                entry = {
+                                    'file_path': document.meta_data['file_path'],
+                                    'scope': func
+                                }
+                                self.entries.append(entry)
+                        elif i == 1:
+                            pass
         
         # deduplication
-        self.dedup()
+        self.dedup_entries()
         
         return self.entries
 
@@ -224,3 +228,83 @@ Here are other files you can refer to:
         print(entries)
         # get vul in entries
         
+        
+        
+
+if __name__ == "__main__":
+    regx_str = r'''@(\w)*\.(get|post|put|delete|patch|options|head|api_route|route|websocket)\s*\('''
+    regx = re.compile(regx_str)
+    
+    code = '''class SearchRoutesResponse(BaseModel):
+    routes: list[Route]
+    next_page_token: str | None = None
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "endpoints": [
+                    {
+                        "name": "openai-chat",
+                        "route_type": "llm/v1/chat",
+                        "model": {
+                            "name": "gpt-4o-mini",
+                            "provider": "openai",
+                        },
+                    },
+                    {
+                        "name": "anthropic-completions",
+                        "route_type": "llm/v1/completions",
+                        "model": {
+                            "name": "claude-instant-100k",
+                            "provider": "anthropic",
+                        },
+                    },
+                    {
+                        "name": "cohere-embeddings",
+                        "route_type": "llm/v1/embeddings",
+                        "model": {
+                            "name": "embed-english-v2.0",
+                            "provider": "cohere",
+                        },
+                    },
+                ],
+                "next_page_token": "eyJpbmRleCI6IDExfQ==",
+            }
+        }
+
+
+def create_app_from_config(config: GatewayConfig) -> GatewayAPI:
+    """
+    Create the GatewayAPI app from the gateway configuration.
+    """
+    limiter = Limiter(
+        key_func=get_remote_address, storage_uri=MLFLOW_GATEWAY_RATE_LIMITS_STORAGE_URI.get()
+    )
+    app = GatewayAPI(
+        config=config,
+        limiter=limiter,
+        title="MLflow AI Gateway",
+        description="The core deployments API for reverse proxy interface using remote inference "
+        "endpoints within MLflow",
+        version=VERSION,
+        docs_url=None,
+    )
+
+    @app.get("/", include_in_schema=False)
+    async def index():
+        return RedirectResponse(url="/docs")
+
+    @app.get("/favicon.ico", include_in_schema=False)
+    async def favicon():
+        for directory in ["build", "public"]:
+            favicon_file = Path(__file__).parent.parent.joinpath(
+                "server", "js", directory, "favicon.ico"
+            )
+            if favicon_file.exists():
+                return FileResponse(favicon_file)
+        raise HTTPException(status_code=404, detail="favicon.ico not found")'''
+    
+    print(find_by_decorator(regx, code))
+    
+    
+    
