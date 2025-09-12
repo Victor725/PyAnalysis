@@ -5,12 +5,10 @@ from frameworks import *
 import re
 from api.data_pipeline import read_all_documents
 from adalflow.core.types import Document
-from import_graph import build_graph
 from pathlib import Path
 
 import io
 import tokenize
-import ast
 
 
 def remove_comments_and_docstrings(source: str) -> str:
@@ -34,66 +32,6 @@ def remove_comments_and_docstrings(source: str) -> str:
         out_tokens.append(token_string)
     
     return "".join(out_tokens)
-
-
-# format scope using line number in source code
-def getFunc(code, line_num):
-    Ast = None
-    try:
-        Ast = ast.parse(code)  # Ast is a instance of ast.Module
-    except:
-        # Ast = ast.parse(code, feature_version=(2,5))
-        return ""
-    
-    current = Ast
-    scope = []
-    
-    def find_body(node):
-        try:
-            body = node.body
-        except:
-            return None
-        
-        # handle 'except'
-        if isinstance(node, ast.Try) == True:
-            body += node.handlers
-            body += node.orelse
-            body += node.finalbody
-        
-        for n in body:
-            if line_num >= n.lineno and line_num <= n.end_lineno: # line_num lie in the node
-                if isinstance(n, ast.ClassDef) or isinstance(n, ast.FunctionDef) or isinstance(n, ast.AsyncFunctionDef):
-                    # fine body that contains line_num
-                    scope.append(n.name)
-                return n
-        return None
-    
-    while(True):
-        current = find_body(current)
-        if current == None:
-            return ".".join(scope)
-
-
-def find_by_decorator(regx:re.Pattern, code):
-    
-    scopes = []
-    
-    # find line number of the decorated function
-    targeted_locations = []
-    tree = ast.parse(code)
-    for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
-            for deco in node.decorator_list:
-                decorator = '@' + ast.get_source_segment(code, deco)
-                if regx.search(decorator):
-                    targeted_locations.append(node.lineno)
-    
-    # get scope information using getFunc()
-    for location in targeted_locations:
-        scopes.append(getFunc(code, location))
-    
-    return scopes
-    
 
 
 '''
@@ -134,7 +72,6 @@ class PyVulDetector:
         )
         self.model = model
         self.language = language
-
     
     def build_req(self, prompt):
         request = {}
@@ -155,8 +92,7 @@ class PyVulDetector:
         request['included_files'] = ""
         
         return request        
-        
-    
+            
     def dedup_entries(self):
         seen = set()
         unique_entries = []
@@ -169,25 +105,51 @@ class PyVulDetector:
                 
         self.entries = unique_entries
     
+    async def gen_sumarize(self):
+        # for each entry
+        # get body, using line number
+        # give LLM the body, generate summarize
+        root = Path(self.path)
+        for i, entry in enumerate(self.entries):
+            lineno = entry['lineno']
+            rel_path = Path(entry['file_path'])
+            file_path = str((root / rel_path).resolve())
+            body = get_def_at_line(file_path, lineno)
+            
+            prompt = f'''You are an expert security-oriented code analyst.
+Given the following Python function/class definition, analyze and summarize its behavior.
+
+Your summary must include:
+User Input Sources: Does the function take any input that could originate from the user (e.g., HTTP request parameters, command-line arguments, environment variables, file contents)? If yes, specify how.
+Main Functionality: Provide a concise but clear description of the function's core purpose and logic.
+Outputs / Return Values: What kind of data does it return or produce (e.g., HTML page, JSON object, file, plain text, system command output)?
+
+Format your answer in a structured way, like:
+User Input Sources: …
+Main Functionality: …
+Outputs / Return Values: …
+
+If given a class, you can return multi groups of User Input Sources, Main Functionality, and Outputs / Return Values for every methods
+
+CRITICAL:
+You NEVER start responses with markdown headers or code fences.
+IMPORTANT: Generate all the content in English.
+
+Here is the function/class:
+
+{body}'''
+
+            request = self.build_req(prompt)
+            summarization = await AskLLM_raw(request)
+            
+            self.entries[i]['summarize'] = summarization
+            
     
     async def getEntry(self):
-        # Whether it is a web app?
-        # webapp_promptContent = '''Your task is to determine whether this project is a web application.
-        # Your answer should be only 'Yes' or 'No'
-        # '''
-        
-        # request = self.build_req(webapp_promptContent)
-        
-        # response_webapp = await AskLLM(request)
-        
-        # if "No" in response_webapp:
-        #     print("Not web app, skip")
-        #     return []
         
         self.documents = read_all_documents(self.path)
 
- 
-        self.entries = []    # {file_path, scope}
+        self.entries = []    # {file_path, scope, lineno}
         for framework in frameworks.keys():
             regxs = frameworks[framework]['regx']
             # regxs[0]: register using decorator
@@ -199,23 +161,39 @@ class PyVulDetector:
                     # before matching, delete all comments and strings in the code
                     content = remove_comments_and_docstrings(document.text)
                     
+                    # if document.meta_data['file_path'] == 'mlflow\\server\\auth\\__init__.py':
+                    #     pass
+                    
                     if regx.search(content):
                         # rel_path = document.meta_data["file_path"]
                         # self.entry_files.append(rel_path)
                         if i == 0: # handle decorator register
                             # funcs: list of function scopes
-                            funcs = find_by_decorator(regx, document.text)
-                            for func in funcs:
+                            scope_and_lineno = find_by_decorator(regx, document.text)
+                            for item in scope_and_lineno:
                                 entry = {
                                     'file_path': document.meta_data['file_path'],
-                                    'scope': func
+                                    'scope': item['scope'],
+                                    'lineno': item['lineno']
                                 }
                                 self.entries.append(entry)
                         elif i == 1:
-                            pass
+                            entries = []
+                            if framework == 'fastapi':
+                                entries = fastapi_find_by_call(self.path, document.meta_data['file_path'])
+                            elif framework == 'django':
+                                entries = django_find_by_call(self.path, document.meta_data['file_path'])
+                            elif framework == 'flask':
+                                entries = flask_find_by_call(self.path, document.meta_data['file_path'])
+                            self.entries.extend(entries)
         
         # deduplication
         self.dedup_entries()
+        
+        if len(self.entries) == 0:
+            return []
+        
+        await self.gen_sumarize()
         
         return self.entries
 
@@ -225,86 +203,28 @@ class PyVulDetector:
         
         # get entries of projs
         entries = asyncio.run(self.getEntry())
-        print(entries)
+        
+        entry_file = "./entries.json"
+        with open(entry_file, "w") as f:
+            json.dump(entries, f)
         # get vul in entries
         
         
         
 
 if __name__ == "__main__":
-    regx_str = r'''@(\w)*\.(get|post|put|delete|patch|options|head|api_route|route|websocket)\s*\('''
+    regx_str = r'''\.add_url_rule\s*\('''
     regx = re.compile(regx_str)
     
-    code = '''class SearchRoutesResponse(BaseModel):
-    routes: list[Route]
-    next_page_token: str | None = None
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "endpoints": [
-                    {
-                        "name": "openai-chat",
-                        "route_type": "llm/v1/chat",
-                        "model": {
-                            "name": "gpt-4o-mini",
-                            "provider": "openai",
-                        },
-                    },
-                    {
-                        "name": "anthropic-completions",
-                        "route_type": "llm/v1/completions",
-                        "model": {
-                            "name": "claude-instant-100k",
-                            "provider": "anthropic",
-                        },
-                    },
-                    {
-                        "name": "cohere-embeddings",
-                        "route_type": "llm/v1/embeddings",
-                        "model": {
-                            "name": "embed-english-v2.0",
-                            "provider": "cohere",
-                        },
-                    },
-                ],
-                "next_page_token": "eyJpbmRleCI6IDExfQ==",
-            }
-        }
-
-
-def create_app_from_config(config: GatewayConfig) -> GatewayAPI:
-    """
-    Create the GatewayAPI app from the gateway configuration.
-    """
-    limiter = Limiter(
-        key_func=get_remote_address, storage_uri=MLFLOW_GATEWAY_RATE_LIMITS_STORAGE_URI.get()
-    )
-    app = GatewayAPI(
-        config=config,
-        limiter=limiter,
-        title="MLflow AI Gateway",
-        description="The core deployments API for reverse proxy interface using remote inference "
-        "endpoints within MLflow",
-        version=VERSION,
-        docs_url=None,
-    )
-
-    @app.get("/", include_in_schema=False)
-    async def index():
-        return RedirectResponse(url="/docs")
-
-    @app.get("/favicon.ico", include_in_schema=False)
-    async def favicon():
-        for directory in ["build", "public"]:
-            favicon_file = Path(__file__).parent.parent.joinpath(
-                "server", "js", directory, "favicon.ico"
-            )
-            if favicon_file.exists():
-                return FileResponse(favicon_file)
-        raise HTTPException(status_code=404, detail="favicon.ico not found")'''
+    code = '''def create_app(app: Flask = app):
+    app.add_url_rule(
+        SIGNUP,
+        'dsaf',
+        view_func=signup.views.as_view(),
+        methods=["GET"],
+    )'''
     
-    print(find_by_decorator(regx, code))
+    print(flask_find_by_call(regx, code))
     
     
     

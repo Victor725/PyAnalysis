@@ -1,5 +1,4 @@
 import os
-import tensorflow
 from mlflow.server import *
 from mlflow.environment_variables import _MLFLOW_SGI_NAME, MLFLOW_FLASK_SERVER_SECRET_KEY
 from mlflow.server import handlers
@@ -17,9 +16,6 @@ SERVE_ARTIFACTS_ENV_VAR = "_MLFLOW_SERVER_SERVE_ARTIFACTS"
 ARTIFACTS_ONLY_ENV_VAR = "_MLFLOW_SERVER_ARTIFACTS_ONLY"
 
 REL_STATIC_DIR = "js/build"
-
-app = Flask(__name__, static_folder=REL_STATIC_DIR)
-IS_FLASK_V1 = Version(importlib.metadata.version("flask")) < Version("2.0")
 
 
 for http_path, handler, methods in handlers.get_endpoints():
