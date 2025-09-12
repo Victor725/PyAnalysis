@@ -56,8 +56,11 @@ def get_def_at_line(file_path, target_line):
                 
             end = getattr(node, "end_lineno", start)
             if node.lineno == target_line:
-                code_snippet = "\n".join(lines[start-1:end])
-                return code_snippet
+                if "def " in lines[node.lineno-1] or "class " in lines[node.lineno-1]:
+                    code_snippet = "\n".join(lines[start-1:end])
+                    return code_snippet
+                else:
+                    return None
             
 # format scope using line number in source code
 def getFunc(code, line_num):
@@ -198,6 +201,17 @@ def django_find_by_call(root, rel_path):
                 entry = jedi_resolve(root, file_path_str, lineno, col)
                 if entry:
                     entries.append(entry)
+            elif isinstance(value_node, ast.Call): # .as_view()
+                # as_view
+                if isinstance(value_node.func, ast.Attribute) and value_node.func.attr == "as_view":
+                    # take content before .as_view as target
+                    col = value_node.func.value.end_col_offset
+                    lineno = value_node.func.value.lineno
+                    entry = jedi_resolve(root, file_path_str, lineno, col)
+                    if entry:
+                        entries.append(entry)
+                # elif isinstance(value_node.func, ast.Name) and value_node.func.id == "include":
+                #     continue
                         
     return entries
 

@@ -110,12 +110,16 @@ class PyVulDetector:
         # get body, using line number
         # give LLM the body, generate summarize
         root = Path(self.path)
+        rm_entries = []
         for i, entry in enumerate(self.entries):
             lineno = entry['lineno']
             rel_path = Path(entry['file_path'])
             file_path = str((root / rel_path).resolve())
             body = get_def_at_line(file_path, lineno)
-            
+            if body == None:
+                rm_entries.append(i)
+                continue
+                
             prompt = f'''You are an expert security-oriented code analyst.
 Given the following Python function/class definition, analyze and summarize its behavior.
 
@@ -143,6 +147,9 @@ Here is the function/class:
             summarization = await AskLLM_raw(request)
             
             self.entries[i]['summarize'] = summarization
+        
+        for i in sorted(rm_entries, reverse=True):
+            self.entries.pop(i)
             
     
     async def getEntry(self):
@@ -161,7 +168,7 @@ Here is the function/class:
                     # before matching, delete all comments and strings in the code
                     content = remove_comments_and_docstrings(document.text)
                     
-                    # if document.meta_data['file_path'] == 'mlflow\\server\\auth\\__init__.py':
+                    # if document.meta_data['file_path'] == 'mlflow\\gateway\\provider_registry.py':
                     #     pass
                     
                     if regx.search(content):
