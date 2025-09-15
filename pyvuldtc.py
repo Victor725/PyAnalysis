@@ -168,8 +168,8 @@ Here is the function/class:
                     # before matching, delete all comments and strings in the code
                     content = remove_comments_and_docstrings(document.text)
                     
-                    # if document.meta_data['file_path'] == 'mlflow\\gateway\\provider_registry.py':
-                    #     pass
+                    if document.meta_data['file_path'] == 'sql\\urls.py':
+                        pass
                     
                     if regx.search(content):
                         # rel_path = document.meta_data["file_path"]
