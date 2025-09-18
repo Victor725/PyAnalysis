@@ -15,19 +15,56 @@ frameworks = {
     },
     'flask':{
         'regx': [
-            r'''(@(\w)*\.(route|get|post|put|delete|patch)\s*\()|(@expose\s*\()''',
+            r'''(@(\w)*\.(route|get|post|head|put|delete|patch)\s*\()|(@expose\s*\()''',
             r'''(\.add_url_rule\s*\()|(\.add_resource\s*\()'''
         ],
         'examples': ''''''
+    },
+    'pyramid':{
+        'regx': [
+            r'''@view_config\s*\(''',
+            r'''\.add_view\s*\('''
+        ]
+    },
+    'bottle':{
+        'regx': [
+            r'''(@(\w)*\.(route|get|post|put|head|delete|patch)\s*\()|(@(route|get|head|post|put|delete|patch)\s*\()''',
+            r'''\.route\s*\('''
+        ]
+    },
+    'tornado':{
+        'regx': [
+            None,
+            r'''tornado.web.Application\s*\('''
+        ]
+    },
+    'websockets':{
+        'regx': [
+            None,
+            r'''websockets\.serve\s*\('''
+        ]
+    },
+    'aiohttp':{
+        'regx': [
+            r'''@(\w)*(\.)+(route|get|post|put|delete|patch|view|head)\s*\(''',
+            r'''\.(add_)+(route|get|post|head|put|patch|delete|view)\s*\('''
+        ],
+        'examples': ''''''
+    },
+    'sanic':{
+        'regx': [
+            None,
+            r'''\.add_route\s*\(|\.add\s*\('''
+        ],
+        'examples': ''''''
+    },
+    'falcon':{
+        'regx': [
+            None,
+            r'''\.add_route\s*\('''
+        ],
+        'examples': ''''''
     }
-    # 'bottle':{
-    #     'regx': r'''(@\s*(route|get|post|put|delete|patch|error)\s*\()|(\broute\s*\()|(\b\w+\.route\s*\()|(\b\w+\.add_route\s*\()''',
-    #     'examples': ''''''
-    # },
-    # 'web2py':{
-    #     'regx': r'''(?:\bpath\s*\(|\bre_path\s*\(|\binclude\s*\(|\.as_view\s*\(|router\.register\s*\(|@action\s*\(|consumers\..*\.as_asgi\s*\(|admin\.site\.urls)''',
-    #     'examples': ''''''
-    # }
 }
 
 from pathlib import Path
@@ -99,6 +136,24 @@ def getFunc(code, line_num):
         if current == None:
             return ".".join(scope)
 
+def getArgs(file_abs, lineno):
+    
+    if "utils.py" in file_abs:
+        pass
+    
+    args = []
+    
+    code = ""
+    with open(file_abs, encoding='utf-8') as f:
+        code = f.read()
+    
+    tree = ast.parse(code)
+    for node in ast.walk(tree):        
+        if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
+            if node.lineno == lineno:    
+                args = [arg.arg for arg in node.args.args]        
+    return args
+
 def jedi_resolve(project_path, file_path, line, col):
     # if "mlflow\\server\\auth\\__init__.py" in str(file_path):
     #     pass
@@ -107,9 +162,25 @@ def jedi_resolve(project_path, file_path, line, col):
     definitions = script.goto(line=line, column=col, follow_imports=True)
     for d in definitions:
         try:
+            args = []
+            
             module_path = Path(d.module_path)
-            rel_path = str(module_path.relative_to(Path(project_path)))
             d_line = d.line
+            
+            if d.type == "function":
+                args = getArgs(str(d.module_path), d.line)
+            elif d.type == "class":
+                args = []
+            elif d.type == 'statement':
+                td = d.infer()[0]
+                module_path = Path(td.module_path)
+                d_line = td.line
+                if td.type == "function":
+                    args = getArgs(str(td.module_path), td.line)
+            else:
+                continue
+            
+            rel_path = str(module_path.relative_to(Path(project_path)))
             
             code = ""
             with open(module_path, encoding="utf-8") as f:
@@ -120,7 +191,8 @@ def jedi_resolve(project_path, file_path, line, col):
             entry = {
                 'file_path': rel_path,
                 'scope': scope,
-                'lineno': d_line
+                'lineno': d_line,
+                'args': args
             }
             return entry
         except:
@@ -133,23 +205,28 @@ def find_by_decorator(regx:re.Pattern, code):
     
     scope_and_lineno = []    #{scope, lineno}
     
-    # find line number of the decorated function
+    # find line number of the decorated function/class
     targeted_locations = []
     tree = ast.parse(code)
     for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
+        if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef) or isinstance(node, ast.ClassDef):
+            args = []
+            if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
+                args = [arg.arg for arg in node.args.args]
             for deco in node.decorator_list:
                 decorator = '@' + ast.get_source_segment(code, deco)
                 if regx.search(decorator):
-                    targeted_locations.append(node.lineno)
+                    targeted_locations.append([node.lineno, args])
+                    break
     
     # get scope information using getFunc()
-    for location in targeted_locations:
+    for location, args in targeted_locations:
         
         scope_and_lineno.append(
             {
                 "lineno": location,
-                'scope': getFunc(code, location)
+                'scope': getFunc(code, location),
+                'args': args
             }
         )
     
@@ -168,7 +245,7 @@ def django_find_by_call(root, rel_path):
     with open(file_path_str, encoding='utf-8') as f:
         code = f.read()
     
-    entries = []    # {file_path(rel), scope(not ''!!!), lineno}
+    entries = []    # {file_path(rel), scope(not ''!!!), lineno, args}
     tree = ast.parse(code)
     
     r'''(django(.|\n)*(?<!\.)(\bpath\s*\(|\bre_path\s*\())|(\.register\s*\()|(\.as_asgi\s*\()'''
@@ -224,7 +301,7 @@ def fastapi_find_by_call(root, rel_path):
     with open(file_path_str, encoding='utf-8') as f:
         code = f.read()
     
-    entries = []    # {file_path(rel), scope(not ''!!!), lineno}
+    entries = []    # {file_path(rel), scope(not ''!!!), lineno, args}
     tree = ast.parse(code)
     # return ast.dump(tree, indent=4)
     r'''(add_api_route|add_api_websocket_route|add_websocket_route|add_route)\s*\('''
@@ -274,7 +351,7 @@ def flask_find_by_call(root, rel_path):
     with open(file_path_str, encoding='utf-8') as f:
         code = f.read()
     
-    entries = []    # {file_path(rel), scope(not ''!!!), lineno}
+    entries = []    # {file_path(rel), scope(not ''!!!), lineno, args}
     tree = ast.parse(code)
     # return ast.dump(tree, indent=4)
     for node in ast.walk(tree):
@@ -332,3 +409,331 @@ def flask_find_by_call(root, rel_path):
                                 entries.append(entry)
                         
     return entries
+
+def pyramid_find_by_call(root, rel_path):
+    
+    proj_root = Path(root)
+    rel_path = Path(rel_path)
+    file_path = proj_root / rel_path
+    
+    file_path_str = str(file_path.resolve())
+    code = ""
+    with open(file_path_str, encoding='utf-8') as f:
+        code = f.read()
+        
+    r'''\.add_view\s*\('''    
+    entries = []    # {file_path(rel), scope(not ''!!!), lineno, args}
+    tree = ast.parse(code)
+    for node in ast.walk(tree):
+        value_node = None
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute):
+                if node.func.attr == "add_view":
+                    if len(node.args) > 0:
+                        value_node = node.args[0]
+                    else:
+                        for kw in node.keywords:
+                            if kw.arg == "view":
+                                value_node = kw.value
+
+        if value_node:
+            if isinstance(value_node, ast.Attribute): # name in other file or under class def
+                col = value_node.value.end_col_offset + 2  # e.g., views.get
+                lineno = value_node.value.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)                            
+            elif isinstance(value_node, ast.Name): # plain function/class name
+                col = value_node.end_col_offset
+                lineno = value_node.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)
+                                
+    return entries
+
+def bottle_find_by_call(root, rel_path):
+    
+    proj_root = Path(root)
+    rel_path = Path(rel_path)
+    file_path = proj_root / rel_path
+    
+    file_path_str = str(file_path.resolve())
+    code = ""
+    with open(file_path_str, encoding='utf-8') as f:
+        code = f.read()
+        
+    r'''\.route\s*\('''    
+    entries = []    # {file_path(rel), scope(not ''!!!), lineno, args}
+    tree = ast.parse(code)
+    for node in ast.walk(tree):
+        value_node = None
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute):
+                if node.func.attr == "route":
+                    if len(node.args) > 2:
+                        value_node = node.args[2]
+                    else:
+                        for kw in node.keywords:
+                            if kw.arg == "callback":
+                                value_node = kw.value
+
+        if value_node:
+            if isinstance(value_node, ast.Attribute): # name in other file or under class def
+                col = value_node.value.end_col_offset + 2  # e.g., views.get
+                lineno = value_node.value.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)                            
+            elif isinstance(value_node, ast.Name): # plain function/class name
+                col = value_node.end_col_offset
+                lineno = value_node.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)
+                                
+    return entries
+
+def tornado_find_by_call(root, rel_path):
+    
+    proj_root = Path(root)
+    rel_path = Path(rel_path)
+    file_path = proj_root / rel_path
+    
+    file_path_str = str(file_path.resolve())
+    code = ""
+    with open(file_path_str, encoding='utf-8') as f:
+        code = f.read()
+        
+    r'''tornado.web.Application\s*\('''  
+    entries = []    # {file_path(rel), scope(not ''!!!), lineno, args}
+    tree = ast.parse(code)
+    for node in ast.walk(tree):
+        value_nodes = []
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute):
+                if node.func.attr == "Application" and \
+                    isinstance(node.func.value, ast.Attribute) and \
+                    node.func.value.attr == "web" and \
+                    isinstance(node.func.value.value, ast.Name) and \
+                    node.func.value.value.id == "tornado":
+                    
+                    if node.args and isinstance(node.args[0], ast.List):
+                        for elt in node.args[0].elts:
+                            if isinstance(elt, ast.Tuple) and len(elt.elts) >= 2:
+                                value_nodes.append(elt.elts[1])
+
+        for value_node in value_nodes:
+            if isinstance(value_node, ast.Attribute): # name in other file or under class def
+                col = value_node.value.end_col_offset + 2  # e.g., views.get
+                lineno = value_node.value.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)                            
+            elif isinstance(value_node, ast.Name): # plain function/class name
+                col = value_node.end_col_offset
+                lineno = value_node.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)
+                                
+    return entries
+
+def websockets_find_by_call(root, rel_path):
+    proj_root = Path(root)
+    rel_path = Path(rel_path)
+    file_path = proj_root / rel_path
+    
+    file_path_str = str(file_path.resolve())
+    code = ""
+    with open(file_path_str, encoding='utf-8') as f:
+        code = f.read()
+    
+    entries = []    # {file_path(rel), scope(not ''!!!), lineno, args}
+    tree = ast.parse(code)
+    # return ast.dump(tree, indent=4)
+    r'''websockets\.serve\s*\('''
+    for node in ast.walk(tree):
+        value_node = None
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute):
+                if node.func.attr == "serve" and \
+                    isinstance(node.func.value, ast.Name) and \
+                    node.func.value.id == "websockets":
+                
+                    if len(node.args) > 0:
+                        value_node = node.args[0]
+                        
+                        
+        if value_node:
+            if isinstance(value_node, ast.Attribute): # name in other file or under class def
+                col = value_node.value.end_col_offset + 2  # get attr
+                lineno = value_node.value.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)                            
+            elif isinstance(value_node, ast.Name): # plain function name
+                col = value_node.end_col_offset
+                lineno = value_node.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)
+                    
+    return entries
+
+def aiohttp_find_by_call(root, rel_path):
+    
+    proj_root = Path(root)
+    rel_path = Path(rel_path)
+    file_path = proj_root / rel_path
+    
+    file_path_str = str(file_path.resolve())
+    code = ""
+    with open(file_path_str, encoding='utf-8') as f:
+        code = f.read()
+        
+    r'''\.(add_)+(route|get|post|head|put|patch|delete|view)\s*\('''  
+    entries = []    # {file_path(rel), scope(not ''!!!), lineno, args}
+    tree = ast.parse(code)
+    for node in ast.walk(tree):
+        value_node = None
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute):
+                if node.func.attr in ["add_route", "route"]:
+                    if len(node.args) > 2:
+                        value_node = node.args[2]
+                    else:
+                        for kw in node.keywords:
+                            if kw.arg == "handler":
+                                value_node = kw.value
+                elif node.func.attr in ["add_get", "add_post", "add_head", 
+                    "add_put", "add_patch", "add_delete", 
+                    "add_view", "get", "post", "head",
+                    "put", "patch", "delete", "view"]:
+                    if len(node.args) > 1:
+                        value_node = node.args[1]
+                    else:
+                        for kw in node.keywords:
+                            if kw.arg == "handler":
+                                value_node = kw.value
+                
+        if value_node:
+            if isinstance(value_node, ast.Attribute): # name in other file or under class def
+                col = value_node.value.end_col_offset + 2  # e.g., views.get
+                lineno = value_node.value.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)                            
+            elif isinstance(value_node, ast.Name): # plain function/class name
+                col = value_node.end_col_offset
+                lineno = value_node.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)
+                                
+    return entries
+
+def sanic_find_by_call(root, rel_path):
+    
+    proj_root = Path(root)
+    rel_path = Path(rel_path)
+    file_path = proj_root / rel_path
+    
+    file_path_str = str(file_path.resolve())
+    code = ""
+    with open(file_path_str, encoding='utf-8') as f:
+        code = f.read()
+    
+    entries = []    # {file_path(rel), scope(not ''!!!), lineno, args}
+    tree = ast.parse(code)
+    
+    r'''\.add_route\s*\(''' #as_view()
+    # .add()
+    # return ast.dump(tree, indent=4)
+    for node in ast.walk(tree):
+        value_node = None
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute):
+                if node.func.attr == "add_route":
+                    if len(node.args) > 0:
+                        value_node = node.args[0]
+                if node.func.attr == "add":
+                    if len(node.args) > 1:
+                        value_node = node.args[1]
+                        
+        if value_node:
+            if isinstance(value_node, ast.Attribute): # name in other file or under class def
+                col = value_node.value.end_col_offset + 2  # get attr
+                lineno = value_node.value.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)                            
+            elif isinstance(value_node, ast.Name): # plain function name
+                col = value_node.end_col_offset
+                lineno = value_node.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)
+            elif isinstance(value_node, ast.Call): # .as_view()
+                # as_view
+                if isinstance(value_node.func, ast.Attribute) and value_node.func.attr == "as_view":
+                    # take content before .as_view as target
+                    col = value_node.func.value.end_col_offset
+                    lineno = value_node.func.value.lineno
+                    entry = jedi_resolve(root, file_path_str, lineno, col)
+                    if entry:
+                        entries.append(entry)
+                # elif isinstance(value_node.func, ast.Name) and value_node.func.id == "include":
+                #     continue
+                        
+    return entries
+
+def falcon_find_by_call(root, rel_path):
+    
+    proj_root = Path(root)
+    rel_path = Path(rel_path)
+    file_path = proj_root / rel_path
+    
+    file_path_str = str(file_path.resolve())
+    code = ""
+    with open(file_path_str, encoding='utf-8') as f:
+        code = f.read()
+    
+    entries = []    # {file_path(rel), scope(not ''!!!), lineno, args}
+    tree = ast.parse(code)
+    
+    r'''\.add_route\s*\('''
+    # return ast.dump(tree, indent=4)
+    for node in ast.walk(tree):
+        value_node = None
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute):
+                if node.func.attr == "add_route":
+                    if len(node.args) > 1:
+                        value_node = node.args[1]
+                        
+        if value_node:
+            if isinstance(value_node, ast.Attribute): # name in other file or under class def
+                col = value_node.value.end_col_offset + 2  # get attr
+                lineno = value_node.value.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)                            
+            elif isinstance(value_node, ast.Name): # plain function name
+                col = value_node.end_col_offset
+                lineno = value_node.lineno
+                entry = jedi_resolve(root, file_path_str, lineno, col)
+                if entry:
+                    entries.append(entry)
+            elif isinstance(value_node, ast.Call):
+                if isinstance(value_node.func, ast.Name):
+                    col = value_node.func.end_col_offset
+                    lineno = value_node.func.lineno
+                    entry = jedi_resolve(root, file_path_str, lineno, col)
+                    if entry:
+                        entries.append(entry)
+                        
+    return entries
+
+
+

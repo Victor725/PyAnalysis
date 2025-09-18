@@ -11,6 +11,7 @@ import io
 import tokenize
 
 
+
 def remove_comments_and_docstrings(source: str) -> str:
     io_obj = io.StringIO(source)
     out_tokens = []
@@ -155,33 +156,48 @@ Here is the function/class:
     async def getEntry(self):
         
         self.documents = read_all_documents(self.path)
-
-        self.entries = []    # {file_path, scope, lineno}
+        
+        compiled_frameworks = {}
         for framework in frameworks.keys():
             regxs = frameworks[framework]['regx']
-            # regxs[0]: register using decorator
-            # regxs[1]: register with func call
             for i, regx_str in enumerate(regxs):
-                regx = re.compile(regx_str)
-                for document in self.documents:
+                if i == 0:
+                    compiled_frameworks[framework] = {}
+                    compiled_frameworks[framework]['regx'] = []
+                if regx_str == None:
+                    compiled_frameworks[framework]['regx'].append(None)
+                else:
+                    compiled_frameworks[framework]['regx'].append(re.compile(regx_str))
+
+
+        self.entries = []    # {file_path, scope, lineno}        
+        for document in self.documents:
+            for framework in compiled_frameworks.keys():
+                regxs = compiled_frameworks[framework]['regx']
+                for i, regx in enumerate(regxs):
+                    
+                    if regx == None:
+                        continue
+                    
                     document:Document                    
                     # before matching, delete all comments and strings in the code
                     content = remove_comments_and_docstrings(document.text)
                     
-                    if document.meta_data['file_path'] == 'sql\\urls.py':
-                        pass
+                    # if document.meta_data['file_path'] == 'sql\\urls.py':
+                    #     pass
                     
                     if regx.search(content):
                         # rel_path = document.meta_data["file_path"]
                         # self.entry_files.append(rel_path)
                         if i == 0: # handle decorator register
                             # funcs: list of function scopes
-                            scope_and_lineno = find_by_decorator(regx, document.text)
-                            for item in scope_and_lineno:
+                            locations = find_by_decorator(regx, document.text)
+                            for item in locations:
                                 entry = {
                                     'file_path': document.meta_data['file_path'],
                                     'scope': item['scope'],
-                                    'lineno': item['lineno']
+                                    'lineno': item['lineno'],
+                                    'args': item['args']
                                 }
                                 self.entries.append(entry)
                         elif i == 1:
@@ -192,15 +208,32 @@ Here is the function/class:
                                 entries = django_find_by_call(self.path, document.meta_data['file_path'])
                             elif framework == 'flask':
                                 entries = flask_find_by_call(self.path, document.meta_data['file_path'])
+                            elif framework == 'pyramid':
+                                entries = pyramid_find_by_call(self.path, document.meta_data['file_path'])
+                            elif framework == 'bottle':
+                                entries = bottle_find_by_call(self.path, document.meta_data['file_path'])
+                            elif framework == 'tornado':
+                                entries = tornado_find_by_call(self.path, document.meta_data['file_path'])
+                            elif framework == 'websockets':
+                                entries = websockets_find_by_call(self.path, document.meta_data['file_path'])    
+                            elif framework == 'aiohttp':
+                                entries = aiohttp_find_by_call(self.path, document.meta_data['file_path'])
+                            elif framework == 'sanic':
+                                entries = sanic_find_by_call(self.path, document.meta_data['file_path'])
+                            elif framework == 'falcon':
+                                entries = falcon_find_by_call(self.path, document.meta_data['file_path'])
+                            
+                            
                             self.entries.extend(entries)
         
         # deduplication
         self.dedup_entries()
         
+        
         if len(self.entries) == 0:
             return []
         
-        await self.gen_sumarize()
+        # await self.gen_sumarize()
         
         return self.entries
 
