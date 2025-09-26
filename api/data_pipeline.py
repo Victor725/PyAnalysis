@@ -155,7 +155,7 @@ def read_all_documents(path: str, is_ollama_embedder: bool = None, excluded_dirs
     # code_extensions = [".py", ".js", ".ts", ".java", ".cpp", ".c", ".h", ".hpp", ".go", ".rs",
     #                    ".jsx", ".tsx", ".html", ".css", ".php", ".swift", ".cs"]
     # LIU: only consider py files
-    code_extensions = [".py"]
+    code_extensions = [".py", ".txt"]
     doc_extensions = [".md", ".txt", ".rst", ".json", ".yaml", ".yml"]
 
     # Determine filtering mode: inclusion or exclusion

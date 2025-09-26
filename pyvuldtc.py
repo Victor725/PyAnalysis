@@ -6,11 +6,8 @@ import re
 from api.data_pipeline import read_all_documents
 from adalflow.core.types import Document
 from pathlib import Path
-
 import io
 import tokenize
-
-
 
 def remove_comments_and_docstrings(source: str) -> str:
     io_obj = io.StringIO(source)
@@ -34,7 +31,6 @@ def remove_comments_and_docstrings(source: str) -> str:
     
     return "".join(out_tokens)
 
-
 '''
 class ChatCompletionRequest(BaseModel):
     """
@@ -57,11 +53,11 @@ class ChatCompletionRequest(BaseModel):
     included_files: Optional[str] = Field(None, description="Comma-separated list of file patterns to include exclusively")
 '''
 class PyVulDetector:
-    
     # provider: ('google', 'openai', 'openrouter', 'ollama', 'bedrock')
     def __init__(
         self, path, provider="openai", model = "gpt-4o",
         language = "en", #(e.g., 'en', 'ja', 'zh', 'es', 'kr', 'vi')
+        potentialVulType_kb = "./PotentialType/knowledge/"
         ):
         self.path = str(Path(path).resolve())
         self.provider = provider
@@ -73,11 +69,16 @@ class PyVulDetector:
         )
         self.model = model
         self.language = language
+        self.potentialVulType_kb = potentialVulType_kb
     
-    def build_req(self, prompt):
+    def build_req(self, prompt, **kargs):
         request = {}
-        
-        request['repo_url'] = self.path
+
+        if kargs.get('repo_url', None) != None:
+            request['repo_url'] = kargs.get('repo_url')
+        else:
+            request['repo_url'] = self.path
+                        
         request['messages'] = [{
             'role': 'user',
             'content': prompt
@@ -92,8 +93,12 @@ class PyVulDetector:
         request['included_dirs'] = ""
         request['included_files'] = ""
         
+        include_dirs = kargs.get('include_dirs', None)
+        if include_dirs != None:
+            request['included_dirs'] = include_dirs
+        
         return request        
-            
+    
     def dedup_entries(self):
         seen = set()
         unique_entries = []
@@ -120,7 +125,9 @@ class PyVulDetector:
             if body == None:
                 rm_entries.append(i)
                 continue
-                
+            
+            # TODO: filter out non-request-handling funcs.
+            
             prompt = f'''You are an expert security-oriented code analyst.
 Given the following Python function/class definition, analyze and summarize its behavior.
 
@@ -151,7 +158,6 @@ Here is the function/class:
         
         for i in sorted(rm_entries, reverse=True):
             self.entries.pop(i)
-            
     
     async def getEntry(self):
         
@@ -233,11 +239,20 @@ Here is the function/class:
         if len(self.entries) == 0:
             return []
         
-        # await self.gen_sumarize()
+        await self.gen_sumarize()
         
         return self.entries
-
-
+    
+    def gen_potVulType(self):
+        for i, entry in enumerate(self.entries):
+            summarize = entry['summarize']
+            include_dirs = "knowledge/"
+            request = self.build_req(summarize, include_dirs=include_dirs, repo_url=self.potentialVulType_kb)
+            docs_by_file = asyncio.run(rag_search(request, top_k=5))
+            self.entries[i]['potential_vul_types'] = []
+            for path in docs_by_file.keys():
+                self.entries[i]['potential_vul_types'].append(os.path.dirname(path))
+            self.entries[i]['potential_vul_types'] = list(set(self.entries[i]['potential_vul_types']))
 
     def findVul(self):
         
@@ -247,7 +262,13 @@ Here is the function/class:
         entry_file = "./entries.json"
         with open(entry_file, "w") as f:
             json.dump(entries, f)
+        
         # get vul in entries
+        # find potential vul types
+        self.gen_potVulType()
+        with open(entry_file, "w") as f:
+            json.dump(entries, f)
+        
         
         
         

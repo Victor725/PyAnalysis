@@ -1,7 +1,7 @@
 frameworks = {
     'django':{
         'regx': [
-            r'''@action\s*\(''',
+            r'''@action\s*\(|@require_POST|@require_GET|@login_required|@permission_required\s*\(|@csrf_exempt''',
             r'''(django(.|\n)*(?<!\.)(\bpath\s*\(|\bre_path\s*\())|(\.register\s*\()|(\.as_asgi\s*\()'''
         ],
         'examples': ''''''

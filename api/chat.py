@@ -33,7 +33,7 @@ class ChatCompletionRequest(BaseModel):
     """
     Model for requesting a chat completion.
     """
-    repo_url: str = Field(..., description="URL of the repository to query")
+    repo_url: str = Field(None, description="URL of the repository to query")
     messages: List[ChatMessage] = Field(..., description="List of chat messages")
     filePath: Optional[str] = Field(None, description="Optional path to a file in the repository to include in the prompt")
     token: Optional[str] = Field(None, description="Personal access token for private repositories")
@@ -46,7 +46,7 @@ class ChatCompletionRequest(BaseModel):
     language: Optional[str] = Field("en", description="Language for content generation (e.g., 'en', 'ja', 'zh', 'es', 'kr', 'vi')")
     excluded_dirs: Optional[str] = Field(None, description="Comma-separated list of directories to exclude from processing")
     excluded_files: Optional[str] = Field(None, description="Comma-separated list of file patterns to exclude from processing")
-    included_dirs: Optional[str] = Field(None, description="Comma-separated list of directories to include exclusively")
+    included_dirs: Optional[str] = Field(None, description="\n-separated list of directories to include exclusively")
     included_files: Optional[str] = Field(None, description="Comma-separated list of file patterns to include exclusively")
 
 
@@ -432,7 +432,7 @@ async def AskLLM_raw(request_data):
             pass
 
 
-async def rag_search(request_data):
+async def rag_search(request_data, top_k):
     request = ChatCompletionRequest(**request_data)
     try:
         request_rag = RAG(provider=request.provider, model=request.model)
@@ -485,7 +485,6 @@ async def rag_search(request_data):
     # Try to perform RAG retrieval
     try:
         # This will use the actual RAG implementation
-        top_k = 20
         retrieved_documents = request_rag(rag_query, top_k = top_k, language=request.language)
 
         if retrieved_documents and retrieved_documents[0].documents:
@@ -500,22 +499,22 @@ async def rag_search(request_data):
                 if file_path not in docs_by_file:
                     docs_by_file[file_path] = []
                 docs_by_file[file_path].append(doc)
+            return docs_by_file
+            # # Format context text with file path grouping
+            # context_parts = []
+            # file_paths = []
+            # for file_path, docs in docs_by_file.items():
+            #     # Add file header with metadata
+            #     header = f"## File Path: {file_path}\n\n"
+            #     file_paths.append(file_path)
+            #     # Add document content
+            #     content = "\n\n".join([doc.text for doc in docs])
 
-            # Format context text with file path grouping
-            context_parts = []
-            file_paths = []
-            for file_path, docs in docs_by_file.items():
-                # Add file header with metadata
-                header = f"## File Path: {file_path}\n\n"
-                file_paths.append(file_path)
-                # Add document content
-                content = "\n\n".join([doc.text for doc in docs])
-
-                context_parts.append(f"{header}{content}")
-            logger.info(f"LIU: Retrieved files: {file_paths}")
-            # Join all parts with clear separation
-            context_text = "\n\n" + "-" * 10 + "\n\n".join(context_parts)
-            print(context_text)
+            #     context_parts.append(f"{header}{content}")
+            # logger.info(f"LIU: Retrieved files: {file_paths}")
+            # # Join all parts with clear separation
+            # context_text = "\n\n" + "-" * 10 + "\n\n".join(context_parts)
+            # print(context_text)
         else:
             logger.warning("No documents retrieved from RAG")
     except Exception as e:
