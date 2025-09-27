@@ -19,6 +19,8 @@ from requests.exceptions import RequestException
 
 from api.tools.embedder import get_embedder
 
+from api.snapshot import *
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -241,7 +243,7 @@ def read_all_documents(path: str, is_ollama_embedder: bool = None, excluded_dirs
             # Check if file matches included file patterns
             if not is_included and included_files:
                 for included_file in included_files:
-                    if file_name == included_file or file_name.endswith(included_file):
+                    if os.path.abspath(file_path) == os.path.abspath(included_file):
                         is_included = True
                         break
 
@@ -415,6 +417,7 @@ def transform_documents_and_save_to_db(
     db = LocalDB()
     db.register_transformer(transformer=data_transformer, key="split_and_embed")
     db.load(documents)
+    # TODO: change to "add one by one", save index to snapshot
     db.transform(key="split_and_embed")
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     db.save_state(filepath=db_path)
@@ -689,7 +692,7 @@ class DatabaseManager:
         self.repo_url_or_path = None
         self.repo_paths = None
 
-    def prepare_database(self, repo_url_or_path: str, type: str = "github", access_token: str = None, is_ollama_embedder: bool = None,
+    def prepare_database(self, repo_url_or_path: str, db_save_dir: str, type: str = "github", access_token: str = None, is_ollama_embedder: bool = None,
                        excluded_dirs: List[str] = None, excluded_files: List[str] = None,
                        included_dirs: List[str] = None, included_files: List[str] = None) -> List[Document]:
         """
@@ -709,7 +712,7 @@ class DatabaseManager:
             List[Document]: List of Document objects
         """
         self.reset_database()
-        self._create_repo(repo_url_or_path, type, access_token)
+        self._create_repo(repo_url_or_path, db_save_dir, type, access_token)
         return self.prepare_db_index(is_ollama_embedder=is_ollama_embedder, excluded_dirs=excluded_dirs, excluded_files=excluded_files,
                                    included_dirs=included_dirs, included_files=included_files)
 
@@ -736,7 +739,7 @@ class DatabaseManager:
             repo_name = url_parts[-1].replace(".git", "")
         return repo_name
 
-    def _create_repo(self, repo_url_or_path: str, repo_type: str = "github", access_token: str = None) -> None:
+    def _create_repo(self, repo_url_or_path: str, db_save_dir: str, repo_type: str = "github", access_token: str = None) -> None:
         """
         Download and prepare all paths.
         Paths:
@@ -750,7 +753,7 @@ class DatabaseManager:
         logger.info(f"Preparing repo storage for {repo_url_or_path}...")
 
         try:
-            root_path = get_adalflow_default_root_path()
+            root_path = db_save_dir
 
             os.makedirs(root_path, exist_ok=True)
             # url
@@ -771,13 +774,16 @@ class DatabaseManager:
                 repo_name = os.path.basename(repo_url_or_path)
                 save_repo_dir = repo_url_or_path
 
-            save_db_file = os.path.join(root_path, "databases", f"{repo_name}.pkl")
+            save_db_file = os.path.join(root_path, f"{repo_name}.pkl")
+            save_db_dir = os.path.dirname(save_db_file)
+
             os.makedirs(save_repo_dir, exist_ok=True)
-            os.makedirs(os.path.dirname(save_db_file), exist_ok=True)
+            os.makedirs(save_db_dir, exist_ok=True)
 
             self.repo_paths = {
                 "save_repo_dir": save_repo_dir,
                 "save_db_file": save_db_file,
+                "save_db_dir": save_db_dir,
             }
             self.repo_url_or_path = repo_url_or_path
             logger.info(f"Repo paths: {self.repo_paths}")
@@ -807,16 +813,77 @@ class DatabaseManager:
             logger.info("Loading existing database...")
             try:
                 self.db = LocalDB.load_state(self.repo_paths["save_db_file"])
-                documents = self.db.get_transformed_data(key="split_and_embed")
-                if documents:
-                    logger.info(f"Loaded {len(documents)} documents from existing database")
-                    return documents
+                
+                # compare snapshot, add new, delete removed, change updated
+                SNAPSHOT_PATH = os.path.join(self.repo_paths["save_db_dir"], "snapshot.json")
+                if not os.path.exists(SNAPSHOT_PATH):
+                    logger.warning("Snapshot file not found, cannot verify database integrity. Please rebuild the database...")
+                    raise ValueError("Snapshot file not found")
+                # diff snapshot
+                old_state = Snapshot.load_snapshot(SNAPSHOT_PATH)
+                new_state = Snapshot.snapshot(self.repo_paths["save_repo_dir"])
+                added, deleted, modified = Snapshot.diff_snapshots(old_state, new_state)
+                
+                if len(added) == 0 and len(deleted) == 0 and len(modified) == 0:
+                    logger.info("No changes detected in the repository since last snapshot.")
+                    documents = self.db.get_transformed_data(key="split_and_embed")
+                    if documents:
+                        logger.info(f"Loaded {len(documents)} documents from existing database")
+                        return documents
+                
+                if len(added) > 0:
+                    # get List[Document] for added files
+                    included_files = [os.path.join(self.repo_paths["save_repo_dir"], f) for f in added]
+                    new_documents = read_all_documents(
+                        self.repo_paths["save_repo_dir"],
+                        is_ollama_embedder=is_ollama_embedder,
+                        included_files=included_files
+                    )
+                    for doc in new_documents:
+                        self.db.add(doc)
+                        
+                if len(deleted) > 0:
+                    for key in self.db.transformed_items.keys():
+                        for i, t in enumerate(self.db.transformed_items[key]):
+                            if t.meta_data["file_path"] in deleted:
+                                self.db.transformed_items[key].pop(i)
+                    for i, t in enumerate(self.db.items):
+                        if t.meta_data["file_path"] in deleted:
+                            self.db.items.pop(i)
+                if len(modified) > 0:
+                    # delete old
+                    for key in self.db.transformed_items.keys():
+                        for i, t in enumerate(self.db.transformed_items[key]):
+                            if t.meta_data["file_path"] in deleted:
+                                self.db.transformed_items[key].pop(i)
+                    for i, t in enumerate(self.db.items):
+                        if t.meta_data["file_path"] in deleted:
+                            self.db.items.pop(i)
+                    # add new
+                    included_files = [os.path.join(self.repo_paths["save_repo_dir"], f) for f in modified]
+                    new_documents = read_all_documents(
+                        self.repo_paths["save_repo_dir"],
+                        is_ollama_embedder=is_ollama_embedder,
+                        included_files=included_files
+                    )
+                    for doc in new_documents:
+                        self.db.add(doc)
+                        
+                Snapshot.save_snapshot(new_state, SNAPSHOT_PATH)
+                
+                return self.db.get_transformed_data(key="split_and_embed")
             except Exception as e:
                 logger.error(f"Error loading existing database: {e}")
                 # Continue to create a new database
 
+        
         # prepare the database
         logger.info("Creating new database...")
+        
+        SNAPSHOT_PATH = os.path.join(self.repo_paths["save_db_dir"], "snapshot.json")
+        state = Snapshot.snapshot(self.repo_paths["save_repo_dir"])
+        Snapshot.save_snapshot(state, SNAPSHOT_PATH)
+        
         documents = read_all_documents(
             self.repo_paths["save_repo_dir"],
             is_ollama_embedder=is_ollama_embedder,

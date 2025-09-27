@@ -1,5 +1,6 @@
 from api.chat import *
 import json
+import os
 import asyncio
 from frameworks import *
 import re
@@ -57,7 +58,7 @@ class PyVulDetector:
     def __init__(
         self, path, provider="openai", model = "gpt-4o",
         language = "en", #(e.g., 'en', 'ja', 'zh', 'es', 'kr', 'vi')
-        potentialVulType_kb = "./PotentialType/knowledge/"
+        potentialVulType_kb = "./PotentialType/knowledge"
         ):
         self.path = str(Path(path).resolve())
         self.provider = provider
@@ -78,6 +79,9 @@ class PyVulDetector:
             request['repo_url'] = kargs.get('repo_url')
         else:
             request['repo_url'] = self.path
+            
+        if kargs.get('db_save_dir', None) != None:
+            request['db_save_dir'] = kargs.get('db_save_dir')
                         
         request['messages'] = [{
             'role': 'user',
@@ -93,9 +97,8 @@ class PyVulDetector:
         request['included_dirs'] = ""
         request['included_files'] = ""
         
-        include_dirs = kargs.get('include_dirs', None)
-        if include_dirs != None:
-            request['included_dirs'] = include_dirs
+        if kargs.get('include_dirs', None) != None:
+            request['included_dirs'] = kargs.get('include_dirs')
         
         return request        
     
@@ -247,7 +250,10 @@ Here is the function/class:
         for i, entry in enumerate(self.entries):
             summarize = entry['summarize']
             include_dirs = "knowledge/"
-            request = self.build_req(summarize, include_dirs=include_dirs, repo_url=self.potentialVulType_kb)
+            
+            db_save_dir = os.path.join(os.path.dirname(self.potentialVulType_kb), "rag")
+            request = self.build_req(summarize, include_dirs=include_dirs, repo_url=self.potentialVulType_kb, db_save_dir=db_save_dir)
+            
             docs_by_file = asyncio.run(rag_search(request, top_k=5))
             self.entries[i]['potential_vul_types'] = []
             for path in docs_by_file.keys():

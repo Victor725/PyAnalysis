@@ -34,6 +34,8 @@ class ChatCompletionRequest(BaseModel):
     Model for requesting a chat completion.
     """
     repo_url: str = Field(None, description="URL of the repository to query")
+    db_save_dir: Optional[str] = Field(None, description="Directory to save or load the RAG database")
+
     messages: List[ChatMessage] = Field(..., description="List of chat messages")
     filePath: Optional[str] = Field(None, description="Optional path to a file in the repository to include in the prompt")
     token: Optional[str] = Field(None, description="Personal access token for private repositories")
@@ -456,7 +458,7 @@ async def rag_search(request_data, top_k):
             included_files = [unquote(file_pattern) for file_pattern in request.included_files.split('\n') if file_pattern.strip()]
             logger.info(f"Using custom included files: {included_files}")
 
-        request_rag.prepare_retriever(request.repo_url, request.type, request.token, excluded_dirs, excluded_files, included_dirs, included_files)
+        request_rag.prepare_retriever(request.repo_url, request.db_save_dir, request.type, request.token, excluded_dirs, excluded_files, included_dirs, included_files)
         logger.info(f"Retriever prepared for {request.repo_url}")
     except ValueError as e:
         if "No valid documents with embeddings found" in str(e):

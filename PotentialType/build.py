@@ -4,45 +4,13 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import json
 from pathlib import Path
 from api.chat import *
+from api.snapshot import *
 import asyncio
 
 
 CASE_PATH = "D:\\Research\\Project\\PyAnalysis\\PotentialType\\cases"
 SNAPSHOT_PATH = "D:\\Research\\Project\\PyAnalysis\\PotentialType\\snapshot.json"
 KNOWLEDGE_PATH = "D:\\Research\\Project\\PyAnalysis\\PotentialType\\knowledge"
-
-
-def snapshot(dir_path):
-    state = {}
-    target_path = Path(dir_path)
-    
-    for f in target_path.rglob("*"):
-        if f.is_dir():
-            continue
-        stat = f.stat()
-        state[str(f.relative_to(target_path))] = stat.st_mtime
-        
-    return state
-
-def save_snapshot(state, filename="./snapshot.json"):
-    with open(filename, "w") as f:
-        json.dump(state, f)
-
-def load_snapshot(filename="./snapshot.json"):
-    if not os.path.exists(filename):
-        return {}
-    with open(filename) as f:
-        return json.load(f)
-
-def diff_snapshots(old, new):
-    old_files = set(old.keys())
-    new_files = set(new.keys())
-
-    added = new_files - old_files
-    deleted = old_files - new_files
-    modified = {f for f in old_files & new_files if old[f] != new[f]}
-
-    return added, deleted, modified
 
 
 def ask_LLM_summary(case_file: Path, model = "gpt-4o", provider = "openai"):
@@ -94,14 +62,13 @@ def main():
     state = {}
     state_to_save = {}
     if not os.path.exists(SNAPSHOT_PATH):
-        state = snapshot(CASE_PATH)
-        # TODO: save when finished writing knowledge
+        state = Snapshot.snapshot(CASE_PATH)
         # save_snapshot(state, SNAPSHOT_PATH)
         added = set(state.keys())
     else:
-        state_to_save = load_snapshot(SNAPSHOT_PATH)
-        state = snapshot(CASE_PATH)
-        added, deleted, modified = diff_snapshots(state_to_save, state)
+        state_to_save = Snapshot.load_snapshot(SNAPSHOT_PATH)
+        state = Snapshot.snapshot(CASE_PATH)
+        added, deleted, modified = Snapshot.diff_snapshots(state_to_save, state)
         
     if len(deleted) > 0:
         for d in deleted:
@@ -131,7 +98,7 @@ def main():
         state_to_save[work] = state[work]
         
         if i != 0 and i % 20 == 0:
-            save_snapshot(state_to_save, SNAPSHOT_PATH)
+            Snapshot.save_snapshot(state_to_save, SNAPSHOT_PATH)
 
 
 if __name__ == "__main__":

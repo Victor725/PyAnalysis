@@ -341,7 +341,7 @@ IMPORTANT FORMATTING RULES:
 
         return valid_documents
 
-    def prepare_retriever(self, repo_url_or_path: str, type: str = "github", access_token: str = None,
+    def prepare_retriever(self, repo_url_or_path: str, db_save_dir: str, type: str = "github", access_token: str = None,
                       excluded_dirs: List[str] = None, excluded_files: List[str] = None,
                       included_dirs: List[str] = None, included_files: List[str] = None):
         """
@@ -358,8 +358,11 @@ IMPORTANT FORMATTING RULES:
         """
         self.initialize_db_manager()
         self.repo_url_or_path = repo_url_or_path
+        
+        
         self.transformed_docs = self.db_manager.prepare_database(
             repo_url_or_path,
+            db_save_dir,
             type,
             access_token,
             is_ollama_embedder=self.is_ollama_embedder,
