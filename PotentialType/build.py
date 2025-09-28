@@ -1,11 +1,11 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-import json
 from pathlib import Path
 from api.chat import *
 from api.snapshot import *
 import asyncio
+import argparse
 
 
 CASE_PATH = "D:\\Research\\Project\\PyAnalysis\\PotentialType\\cases"
@@ -15,26 +15,17 @@ KNOWLEDGE_PATH = "D:\\Research\\Project\\PyAnalysis\\PotentialType\\knowledge"
 
 def ask_LLM_summary(case_file: Path, model = "gpt-4o", provider = "openai"):
     
-    prompt = f"""You are an expert security-oriented code analyst.
-Given the following Python function/class definition, analyze and summarize its behavior.
+    prompt = f"""You are an expert in security-oriented code analysis.
+Analyze and summarize the following Python function or class at a high level.
 
-Your summary must include:
-User Input Sources: Does the function take any input that could originate from the user (e.g., HTTP request parameters, command-line arguments, environment variables, file contents)? If yes, specify how.
-Main Functionality: Provide a concise but clear description of the function's core purpose and logic.
-Outputs / Return Values: What kind of data does it return or produce (e.g., HTML page, JSON object, file, plain text, system command output)?
+Guidelines:
+Describe the purpose and behavior of the code.
+If the input is a function, provide one concise summary of its overall role.
+If the input is a class, provide a separate summary for each method, focusing on what it does.
+Avoid mentioning variable names, parameter names, or low-level implementation details.
+Emphasize what the function or method achieves, not how it is implemented.
 
-Format your answer in a structured way, like:
-User Input Sources: …
-Main Functionality: …
-Outputs / Return Values: …
-
-If given a class, you can return multi groups of User Input Sources, Main Functionality, and Outputs / Return Values for every methods
-
-CRITICAL:
-You NEVER start responses with markdown headers or code fences.
-IMPORTANT: Generate all the content in English.
-
-Here is the function/class:
+Here is the code:
 
 {case_file.read_text(encoding="utf-8")}
 
@@ -55,6 +46,15 @@ Here is the function/class:
 
 
 def main():
+
+    parser = argparse.ArgumentParser(description="Build knowledge for potential type detection.")
+    parser.add_argument("--rebuild", action="store_true", help="Whether to rebuild the knowledge base. Default is False.")
+    args = parser.parse_args()
+
+    if args.rebuild:
+        if os.path.exists(SNAPSHOT_PATH):
+            os.remove(SNAPSHOT_PATH)
+    
     # check snapshot
     added = set()
     deleted = set()

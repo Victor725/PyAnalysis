@@ -129,33 +129,39 @@ class PyVulDetector:
                 rm_entries.append(i)
                 continue
             
-            # TODO: filter out non-request-handling funcs.
-            
-            prompt = f'''You are an expert security-oriented code analyst.
-Given the following Python function/class definition, analyze and summarize its behavior.
+            # Filter out non-request-handling funcs.  
+            # then summarize
+            prompt = f'''You are an expert in security-oriented code analysis.
 
-Your summary must include:
-User Input Sources: Does the function take any input that could originate from the user (e.g., HTTP request parameters, command-line arguments, environment variables, file contents)? If yes, specify how.
-Main Functionality: Provide a concise but clear description of the function's core purpose and logic.
-Outputs / Return Values: What kind of data does it return or produce (e.g., HTML page, JSON object, file, plain text, system command output)?
+First, you need to determine if its behavior or return value is directly influenced by external input (such as request data, command-line arguments, environment variables, files, or user-provided values).
+Only consider whether the function/class itself directly reads, accesses, or processes such input.  
+Ignore static content such as HTML templates, string literals, or embedded JavaScript code that may reference external input but is not actually executed by the function/class itself.
 
-Format your answer in a structured way, like:
-User Input Sources: …
-Main Functionality: …
-Outputs / Return Values: …
+If it does not, just answer strictly with "!No!". Do not provide any explanation or additional text.
 
-If given a class, you can return multi groups of User Input Sources, Main Functionality, and Outputs / Return Values for every methods
 
-CRITICAL:
-You NEVER start responses with markdown headers or code fences.
-IMPORTANT: Generate all the content in English.
+If it does, summarize the following Python function or class at a high level of abstraction.
 
-Here is the function/class:
+Guidelines:
+Focus only on what the code is designed to do, not how it does it.
+If the input is a function, provide one concise summary of its overall role.
+If the input is a class, provide a separate summary for each method, focusing on what it does.
+Avoid mentioning variable names, parameter names, or implementation details.
+Emphasize what the function or method achieves, not how it is implemented.
 
-{body}'''
+Here is the code:
+
+{body}
+
+'''
 
             request = self.build_req(prompt)
             summarization = await AskLLM_raw(request)
+
+            if "!no!" in summarization.lower():
+                rm_entries.append(i)
+                continue
+            
             
             self.entries[i]['summarize'] = summarization
         

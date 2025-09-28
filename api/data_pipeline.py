@@ -854,10 +854,10 @@ class DatabaseManager:
                     # delete old
                     for key in self.db.transformed_items.keys():
                         for i, t in enumerate(self.db.transformed_items[key]):
-                            if t.meta_data["file_path"] in deleted:
+                            if t.meta_data["file_path"] in modified:
                                 self.db.transformed_items[key].pop(i)
                     for i, t in enumerate(self.db.items):
-                        if t.meta_data["file_path"] in deleted:
+                        if t.meta_data["file_path"] in modified:
                             self.db.items.pop(i)
                     # add new
                     included_files = [os.path.join(self.repo_paths["save_repo_dir"], f) for f in modified]

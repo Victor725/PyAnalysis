@@ -119,8 +119,9 @@ def main():
                     case_name = cve + f"_{i}.py"
                 else:
                     case_name = cve + ".py"
-                target_path = Path(CASE_PATH) / Type / case_name
-                target_path.write_text(func_content, encoding="utf-8")
+                target_path: Path = Path(CASE_PATH) / Type / case_name
+                if not target_path.exists():
+                    target_path.write_text(func_content, encoding="utf-8")
                 
                 
 
