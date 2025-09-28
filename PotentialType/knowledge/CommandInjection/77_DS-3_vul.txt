@@ -1,0 +1,1 @@
+This function searches log files for a specified pattern, with an option for case-sensitive matching.

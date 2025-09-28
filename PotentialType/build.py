@@ -16,13 +16,13 @@ KNOWLEDGE_PATH = "D:\\Research\\Project\\PyAnalysis\\PotentialType\\knowledge"
 def ask_LLM_summary(case_file: Path, model = "gpt-4o", provider = "openai"):
     
     prompt = f"""You are an expert in security-oriented code analysis.
-Analyze and summarize the following Python function or class at a high level.
+Summarize the following Python function or class at a high level of abstraction.
 
 Guidelines:
-Describe the purpose and behavior of the code.
+Focus only on what the code is designed to do, not how it does it.
 If the input is a function, provide one concise summary of its overall role.
 If the input is a class, provide a separate summary for each method, focusing on what it does.
-Avoid mentioning variable names, parameter names, or low-level implementation details.
+Avoid mentioning variable names, parameter names, or implementation details.
 Emphasize what the function or method achieves, not how it is implemented.
 
 Here is the code:
@@ -80,6 +80,7 @@ def main():
         workset = added | modified
 
     for i, work in enumerate(workset):
+        print(f"Processing {i+1}/{len(workset)}: {work} ...")
         # ask LLM to genrate summary for case
         case_file: Path = Path(CASE_PATH) / work
         summary = None

@@ -86,26 +86,37 @@ def get_vul_type(vul_type:str):
 def main():
     case_df = pd.read_csv(CASE_CSV_PATH)
     for index, row in case_df.iterrows():
-        cvelnk = row["CVE"]
-        cve = cvelnk[cvelnk.find("CVE-"):]
-        cve_dir = Path(CVE_COLLECTION_PATH) / cve
+        cvelnk = row["Vul"]
         
-        # unzip
-        files = os.listdir(cve_dir)  # file name, not abs path
-        dir_name = None
-        for file in files:
-            if file.endswith("-vul.zip"):
-                file_name = os.path.join(cve_dir, file)
-                dir_name = un_zip(file_name)  # unzipped dir
-                break
+        if "CVE-" in cvelnk:
+            cve = cvelnk[cvelnk.find("CVE-"):]
+            cve_dir = Path(CVE_COLLECTION_PATH) / cve
+            
+            # unzip
+            files = os.listdir(cve_dir)  # file name, not abs path
+            dir_name = None
+            for file in files:
+                if file.endswith("-vul.zip"):
+                    file_name = os.path.join(cve_dir, file)
+                    dir_name = un_zip(file_name)  # unzipped dir
+                    break
+            item_root = cve_dir / dir_name
+        else:
+            # From Synthetic dataset
+            item_root = Path("G:\\SASTcomparison\\SyntheticDataset")
         
-        item_root = cve_dir / dir_name
         rel_locations = row["EntryPoint"].split("; ")
         for i, rel_location in enumerate(rel_locations):
-            rel_path = rel_location.split(":")[0]
-            scope = rel_location.split(":")[1]
             
-            abs_path = item_root / rel_path
+            if ":" in rel_location:  # from CVE dataset
+                rel_path = rel_location.split(":")[0]
+                scope = rel_location.split(":")[1]
+                abs_path = item_root / rel_path
+            else:  # from synthetic dataset
+                cwe = cvelnk[:cvelnk.find("_DS")]
+                suffix = "_vul.py"
+                abs_path = item_root / cwe / (cvelnk+suffix)
+                scope = rel_location
             
             func_content = get_function_content(abs_path, scope)
             
@@ -115,10 +126,13 @@ def main():
                 Type = get_vul_type(vul_type)
                 
                 case_name = ""
-                if len(rel_locations) > 1:
-                    case_name = cve + f"_{i}.py"
+                if "CVE-" in cvelnk:
+                    if len(rel_locations) > 1:
+                        case_name = cve + f"_{i}.py"
+                    else:
+                        case_name = cve + ".py"
                 else:
-                    case_name = cve + ".py"
+                    case_name = cvelnk + "_vul.py"
                 target_path: Path = Path(CASE_PATH) / Type / case_name
                 if not target_path.exists():
                     target_path.write_text(func_content, encoding="utf-8")

@@ -1,0 +1,1 @@
+This function handles HTTP POST requests to perform calculations based on a mathematical expression provided in the request body. It returns the result of the calculation or an error message if the input is invalid or an exception occurs.

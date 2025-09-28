@@ -1,0 +1,1 @@
+The function captures a screenshot of a website using a specified browser and saves it to a file. It allows customization of the delay before capture and whether to capture the full page.

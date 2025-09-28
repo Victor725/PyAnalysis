@@ -1,0 +1,1 @@
+The function provides an endpoint for searching employees in a database based on a query parameter, returning a list of employees whose names or emails match the search term.

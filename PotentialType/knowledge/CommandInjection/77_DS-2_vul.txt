@@ -1,0 +1,1 @@
+The function executes a network traceroute command to trace the route packets take to a specified target host and returns the result as a string. It is vulnerable to command injection due to the way it incorporates the target host into the command.

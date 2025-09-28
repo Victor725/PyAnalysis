@@ -1,0 +1,1 @@
+The function searches for files within a specified directory that contain a given keyword and returns a list of filenames that match the search criteria. However, it is vulnerable to command injection due to the way the keyword is incorporated into the shell command.

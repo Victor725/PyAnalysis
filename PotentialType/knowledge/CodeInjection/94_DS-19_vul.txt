@@ -1,0 +1,1 @@
+This function handles POST requests to evaluate mathematical or logical expressions provided in the request body and returns the evaluation result. If the input is missing or invalid, it returns an error message.

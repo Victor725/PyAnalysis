@@ -133,9 +133,9 @@ class PyVulDetector:
             # then summarize
             prompt = f'''You are an expert in security-oriented code analysis.
 
-First, you need to determine if its behavior or return value is directly influenced by external input (such as request data, command-line arguments, environment variables, files, or user-provided values).
-Only consider whether the function/class itself directly reads, accesses, or processes such input.  
-Ignore static content such as HTML templates, string literals, or embedded JavaScript code that may reference external input but is not actually executed by the function/class itself.
+Given a function/class, first, you need to determine if its behavior or return value is directly influenced by external input (such as request data, command-line arguments, environment variables, files, or other user-provided values).
+Only consider whether the function/class itself directly reads, accesses, or processes such input.
+Ignore static content such as static HTML code, string literals, or embedded JavaScript code that may reference external input but is not actually executed by the function/class itself.
 
 If it does not, just answer strictly with "!No!". Do not provide any explanation or additional text.
 
@@ -260,7 +260,7 @@ Here is the code:
             db_save_dir = os.path.join(os.path.dirname(self.potentialVulType_kb), "rag")
             request = self.build_req(summarize, include_dirs=include_dirs, repo_url=self.potentialVulType_kb, db_save_dir=db_save_dir)
             
-            docs_by_file = asyncio.run(rag_search(request, top_k=5))
+            docs_by_file = asyncio.run(rag_search(request, top_k=3))
             self.entries[i]['potential_vul_types'] = []
             for path in docs_by_file.keys():
                 self.entries[i]['potential_vul_types'].append(os.path.dirname(path))

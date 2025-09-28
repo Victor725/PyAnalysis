@@ -1,0 +1,1 @@
+This function is designed to search for users in a database based on optional username and email criteria provided by the user. It retrieves and displays the search results in an HTML format. However, it is vulnerable to SQL injection due to the way the SQL query is constructed.

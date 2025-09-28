@@ -1,0 +1,1 @@
+The function provides a search feature for hotel rooms based on specified criteria such as room type, maximum price, and availability on a given date. It retrieves matching room details from a database and returns the results in JSON format. Note that the function is vulnerable to SQL injection due to the way it constructs the query.

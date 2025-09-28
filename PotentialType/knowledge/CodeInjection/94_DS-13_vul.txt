@@ -1,0 +1,1 @@
+The function processes a POST request to filter a list of products based on dynamic criteria specified in the request body. It evaluates the criteria using potentially unsafe dynamic code execution, and returns the filtered results along with the count.

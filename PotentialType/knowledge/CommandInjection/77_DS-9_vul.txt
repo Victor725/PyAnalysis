@@ -1,0 +1,1 @@
+This function performs a DNS query for a specified domain and query type using a command-line tool, and returns the query result if successful. However, it is vulnerable to command injection due to the way the query type is handled.

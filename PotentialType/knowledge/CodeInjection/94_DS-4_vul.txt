@@ -1,0 +1,1 @@
+This function calculates the total price for a specified product type by applying a discount formula provided as a string, which is executed in a potentially unsafe manner.

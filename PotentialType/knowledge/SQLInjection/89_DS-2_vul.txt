@@ -1,0 +1,1 @@
+This function retrieves employee records from a database based on a specified filter type and value, returning a list of employees that match the criteria.

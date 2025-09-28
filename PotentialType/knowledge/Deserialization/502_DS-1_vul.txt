@@ -1,0 +1,1 @@
+This function handles HTTP POST requests. It performs different actions based on the request path. If the path is '/upload_config', it processes a configuration upload and responds with success or failure. If the path is '/record', it records an event and responds with success or an error if the event data is invalid. For any other path, it responds with a not found error.

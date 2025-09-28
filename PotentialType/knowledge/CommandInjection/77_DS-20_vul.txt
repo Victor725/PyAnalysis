@@ -1,0 +1,1 @@
+The function is designed to gather and save system information based on the specified type, which can include all system information, hardware details, software details, or network information. It can also execute a custom command to retrieve specific information. The output is saved to a file, and the function returns the file path where the information is stored.
