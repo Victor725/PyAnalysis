@@ -1,1 +1,1 @@
-The function captures a screenshot of a website using a specified browser and saves it to a file. It allows customization of the delay before capture and whether to capture the full page.
+This function captures a screenshot of a specified website using different browser engines and saves it to a file. It validates the URL before proceeding and offers options to choose the browser engine, set a delay, and decide whether to capture the full page. The function contains a command injection vulnerability due to the way it constructs and executes shell commands.

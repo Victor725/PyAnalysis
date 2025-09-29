@@ -1,1 +1,1 @@
-The function is designed to process a firmware update by deserializing firmware metadata, validating it, caching the firmware, and scheduling updates for compatible devices.
+The function processes a firmware update by deserializing firmware metadata, validating it, and caching the firmware if valid. It then schedules update commands for devices compatible with the firmware.

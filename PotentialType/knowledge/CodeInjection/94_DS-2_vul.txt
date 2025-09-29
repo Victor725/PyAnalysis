@@ -1,1 +1,1 @@
-The function is designed to filter a list of data based on a user-provided expression. It evaluates each item against the expression, and if the item satisfies the expression, it is included in the returned filtered list. Note that the function is vulnerable to code injection due to the use of `eval` with user-controlled input.
+This function filters a list of items based on a user-provided filter expression, evaluating the expression in a way that poses a risk of code injection.

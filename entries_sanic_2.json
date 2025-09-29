@@ -1,0 +1,95 @@
+[
+    {
+        "file_path": "sanic.py",
+        "scope": "handler",
+        "lineno": 32,
+        "args": [
+            "request"
+        ],
+        "summarize": "The function handles an incoming HTTP POST request, processes its streaming body by replacing certain characters, and writes the modified content back to the response stream.",
+        "potential_vul_types": [
+            "PathTraversal: 0.781000018119812",
+            "XSS: 0.7670000195503235",
+            "CommandInjection: 0.7609999775886536",
+            "PathTraversal: 0.7570000290870667",
+            "XSS: 0.7490000128746033",
+            "PathTraversal: 0.7490000128746033",
+            "XSS: 0.7480000257492065",
+            "XSS: 0.7409999966621399"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "bq_put_handler",
+        "lineno": 47,
+        "args": [
+            "request"
+        ],
+        "summarize": "This function asynchronously handles PUT requests to a specific endpoint, processes the incoming streamed request data by reading and decoding it, replaces certain characters, and returns a response.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7639999985694885",
+            "PathTraversal: 0.7429999709129333",
+            "PathTraversal: 0.7379999756813049",
+            "XSS: 0.7360000014305115",
+            "CommandInjection: 0.7350000143051147",
+            "XSS: 0.7350000143051147",
+            "SQLInjection: 0.7319999933242798",
+            "XSS: 0.7239999771118164"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "bq_post_handler",
+        "lineno": 59,
+        "args": [
+            "request"
+        ],
+        "summarize": "This asynchronous function reads data from a request stream, decodes it as UTF-8, replaces all occurrences of \"1\" with \"A\", and returns the modified content as a text response.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7120000123977661",
+            "XSS: 0.699999988079071",
+            "PathTraversal: 0.6959999799728394",
+            "CommandInjection: 0.6919999718666077",
+            "PathTraversal: 0.6890000104904175",
+            "PathTraversal: 0.6869999766349792",
+            "SQLInjection: 0.6809999942779541",
+            "PathTraversal: 0.6790000200271606"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "SimpleView",
+        "lineno": 14,
+        "args": [],
+        "summarize": "The class provides an asynchronous HTTP POST method handler that reads and processes data from a request stream, appending it to a result string until the stream is exhausted.",
+        "potential_vul_types": [
+            "XSS: 0.7549999952316284",
+            "CommandInjection: 0.7459999918937683",
+            "XSS: 0.7300000190734863",
+            "PathTraversal: 0.7229999899864197",
+            "PathTraversal: 0.722000002861023",
+            "XSS: 0.7210000157356262",
+            "SQLInjection: 0.7210000157356262",
+            "XSS: 0.7139999866485596"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "post_handler",
+        "lineno": 73,
+        "args": [
+            "request"
+        ],
+        "summarize": "This function handles an HTTP POST request by asynchronously reading and accumulating the request body data, then returns the accumulated data as a text response.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7440000176429749",
+            "CommandInjection: 0.7419999837875366",
+            "PathTraversal: 0.7369999885559082",
+            "XSS: 0.7360000014305115",
+            "XSS: 0.7350000143051147",
+            "XSS: 0.7329999804496765",
+            "PathTraversal: 0.7300000190734863",
+            "XSS: 0.7279999852180481"
+        ]
+    }
+]

@@ -36,6 +36,6 @@ def build_graph(root:str, documents:list[Document]):
 if __name__ == "__main__":
     
     path = str(Path("./projs/import").resolve())
-    documents = read_all_documents(path)
+    documents = read_all_documents(path, code_extensions=[".py"])
     
     g = build_graph(path, documents)

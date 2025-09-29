@@ -1,1 +1,1 @@
-The function is designed to execute a specific step in a workflow using provided logic and then store the result in a session with a color-coded message indicating success or failure, before redirecting the user to the homepage.
+This function executes a specific step in a workflow and stores a success or failure message in the session, then redirects the user to the homepage.

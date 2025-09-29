@@ -1,1 +1,1 @@
-This function processes a POST request to execute a specified operation received in JSON format. It checks for the presence of JSON data and a specific operation field, then attempts to execute the operation, returning the result or an error message if execution fails.
+This function handles HTTP POST requests to execute a specified operation received in JSON format and returns the result or an error message.

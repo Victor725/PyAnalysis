@@ -1,1 +1,1 @@
-The function is designed to update configuration settings by processing data received from a POST request and returning a success or error response based on the outcome.
+The function processes a POST request to update configuration settings by deserializing the provided YAML data. It returns a success message if the operation is successful or an error message if an exception occurs.

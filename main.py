@@ -11,7 +11,7 @@ def main():
    
     # path = "./projs/PyWebappTest"
     # path = "./projs/HttpsServer"
-    # path = "./projs/mlflow"
+    path = "./projs/mlflow"
     # path = "./projs/Archery"
     # path = "./projs/Synthetic_servers"
     # path = "./check/django"
@@ -21,7 +21,7 @@ def main():
     # path = "./check/websockets"
     # path = "./check/aiohttp"
     # path = "./check/sanic"
-    path = "./check/falcon"
+    # path = "./check/falcon"
     
     pyVD = PyVulDetector(path)#, model="gpt-5")
     

@@ -495,13 +495,13 @@ async def rag_search(request_data, top_k):
             logger.info(f"Retrieved {len(documents)} documents")
 
             # Group documents by file path
-            docs_by_file = {}
-            for doc in documents:
-                file_path = doc.meta_data.get('file_path', 'unknown')
-                if file_path not in docs_by_file:
-                    docs_by_file[file_path] = []
-                docs_by_file[file_path].append(doc)
-            return docs_by_file
+            # docs_by_file = {}
+            # for doc in documents:
+            #     file_path = doc.meta_data.get('file_path', 'unknown')
+            #     if file_path not in docs_by_file:
+            #         docs_by_file[file_path] = []
+            #     docs_by_file[file_path].append(doc)
+            return documents, retrieved_documents[0].doc_scores
             # # Format context text with file path grouping
             # context_parts = []
             # file_paths = []

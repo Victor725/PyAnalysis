@@ -1,1 +1,1 @@
-The function facilitates searching for books in a database by title or author based on a user-provided search term, and it returns the search results to be displayed on a web page.
+The function handles HTTP requests to search for books based on a query parameter, retrieving matching records from a database and rendering a results page.

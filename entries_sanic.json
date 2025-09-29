@@ -1,0 +1,68 @@
+[
+    {
+        "file_path": "sanic.py",
+        "scope": "handler",
+        "lineno": 32,
+        "args": [
+            "request"
+        ],
+        "summarize": "The function handles incoming POST requests with streaming data, processes the request body by replacing certain characters, and writes the modified content back to the response stream asynchronously.",
+        "potential_vul_types": [
+            "XSS",
+            "PathTraversal",
+            "CommandInjection"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "bq_put_handler",
+        "lineno": 47,
+        "args": [
+            "request"
+        ],
+        "summarize": "The function handles incoming streamed request data, processes the data by replacing certain characters, and returns a modified result.",
+        "potential_vul_types": [
+            "SQLInjection",
+            "PathTraversal",
+            "CommandInjection"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "bq_post_handler",
+        "lineno": 59,
+        "args": [
+            "request"
+        ],
+        "summarize": "Processes and returns modified request body content by replacing specific characters.",
+        "potential_vul_types": [
+            "XSS",
+            "PathTraversal",
+            "CommandInjection"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "SimpleView",
+        "lineno": 14,
+        "args": [],
+        "summarize": "The method processes streaming request data asynchronously, reading and decoding it from bytes to a string until no more data is available.",
+        "potential_vul_types": [
+            "PathTraversal",
+            "CommandInjection"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "post_handler",
+        "lineno": 73,
+        "args": [
+            "request"
+        ],
+        "summarize": "The function processes and returns the body content of an HTTP request as a UTF-8 decoded string.",
+        "potential_vul_types": [
+            "PathTraversal",
+            "CommandInjection"
+        ]
+    }
+]

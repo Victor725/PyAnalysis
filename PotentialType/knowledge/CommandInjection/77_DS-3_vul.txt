@@ -1,1 +1,1 @@
-This function searches log files for a specified pattern, with an option for case-sensitive matching.
+This function searches through log files for a specified pattern, optionally considering case sensitivity, and returns the matching lines. However, it is vulnerable to command injection due to the way the pattern is handled in the command execution.

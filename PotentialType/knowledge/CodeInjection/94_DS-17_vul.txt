@@ -1,1 +1,1 @@
-This function processes POST requests to evaluate mathematical expressions provided in JSON format, returning the result or an error message if the evaluation fails.
+This function is a web API endpoint that evaluates mathematical expressions received in a POST request. It returns the result of the evaluation or an error message if the expression is missing or if an exception occurs during evaluation. Note that it uses a potentially insecure method to evaluate the expressions.

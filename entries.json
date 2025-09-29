@@ -1,1 +1,921 @@
-[{"file_path": "79_DS-10_fix.py", "scope": "ReportResource", "lineno": 31, "args": [], "summarize": "The `ReportResource` class has two methods:\n\n- `on_get`: Handles retrieving and displaying a specific report in HTML format if an ID is provided, or a list of all reports if no ID is provided.\n- `on_post`: Handles creating a new report from JSON data provided in the request body and returns the ID of the newly created report.", "potential_vul_types": ["CodeInjection", "XSS"]}]
+[
+    {
+        "file_path": "examples\\pyfunc\\model_as_code.py",
+        "scope": "AIModel.predict",
+        "lineno": 20,
+        "args": [
+            "self",
+            "context",
+            "model_input"
+        ],
+        "summarize": "The function processes a list of user inputs, sends each input to an OpenAI model for a response, and returns the responses in a DataFrame.",
+        "potential_vul_types": [
+            "XSS: 0.7680000066757202",
+            "XSS: 0.7490000128746033",
+            "CommandInjection: 0.7459999918937683",
+            "XSS: 0.7390000224113464",
+            "XSS: 0.7379999756813049",
+            "SQLInjection: 0.734000027179718",
+            "CommandInjection: 0.7289999723434448",
+            "PathTraversal: 0.7289999723434448"
+        ]
+    },
+    {
+        "file_path": "examples\\pyfunc\\model_as_code.py",
+        "scope": "AIModel.get_open_ai_model_response",
+        "lineno": 32,
+        "args": [
+            "self",
+            "user_input"
+        ],
+        "summarize": "The function sends user input to an OpenAI model to generate a chat completion response.",
+        "potential_vul_types": [
+            "XSS: 0.7760000228881836",
+            "SQLInjection: 0.7720000147819519",
+            "CommandInjection: 0.765999972820282",
+            "XSS: 0.7620000243186951",
+            "XSS: 0.746999979019165",
+            "CommandInjection: 0.7459999918937683",
+            "CommandInjection: 0.7450000047683716",
+            "PathTraversal: 0.7419999837875366"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\app.py",
+        "scope": "create_app_from_config.get_endpoint",
+        "lineno": 293,
+        "args": [
+            "endpoint_name"
+        ],
+        "summarize": "The function retrieves an endpoint configuration based on a provided endpoint name, returning it if found, or raising an HTTP 404 exception if not present or active.",
+        "potential_vul_types": [
+            "XSS: 0.6840000152587891",
+            "XSS: 0.6840000152587891",
+            "SQLInjection: 0.6729999780654907",
+            "PathTraversal: 0.6600000262260437",
+            "CommandInjection: 0.656000018119812",
+            "XSS: 0.6539999842643738",
+            "PathTraversal: 0.652999997138977",
+            "PathTraversal: 0.652999997138977"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\app.py",
+        "scope": "create_app_from_config.get_route",
+        "lineno": 304,
+        "args": [
+            "route_name"
+        ],
+        "summarize": "The function retrieves and returns a dynamic route based on the provided route name, or raises an HTTP exception if the route is not found or active.",
+        "potential_vul_types": [
+            "XSS: 0.6729999780654907",
+            "PathTraversal: 0.6639999747276306",
+            "XSS: 0.6610000133514404",
+            "XSS: 0.6589999794960022",
+            "XSS: 0.6439999938011169",
+            "XSS: 0.6430000066757202",
+            "PathTraversal: 0.6399999856948853",
+            "SQLInjection: 0.6389999985694885"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\app.py",
+        "scope": "create_app_from_config.list_endpoints",
+        "lineno": 316,
+        "args": [
+            "page_token"
+        ],
+        "summarize": "The function retrieves a paginated list of dynamic endpoints, optionally starting from a specified page token, and returns them in a structured response.",
+        "potential_vul_types": [
+            "CommandInjection: 0.7059999704360962",
+            "XSS: 0.699999988079071",
+            "XSS: 0.6940000057220459",
+            "XSS: 0.6919999718666077",
+            "XSS: 0.6819999814033508",
+            "XSS: 0.6769999861717224",
+            "PathTraversal: 0.6679999828338623",
+            "PathTraversal: 0.6679999828338623"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\app.py",
+        "scope": "create_app_from_config.search_routes",
+        "lineno": 331,
+        "args": [
+            "page_token"
+        ],
+        "summarize": "The function handles paginated retrieval of dynamic routes, returning a subset of routes and a token for fetching the next page based on an optional page token input.",
+        "potential_vul_types": [
+            "PathTraversal: 0.6940000057220459",
+            "XSS: 0.6819999814033508",
+            "XSS: 0.6740000247955322",
+            "XSS: 0.6729999780654907",
+            "XSS: 0.6700000166893005",
+            "CommandInjection: 0.6679999828338623",
+            "XSS: 0.6669999957084656",
+            "XSS: 0.6650000214576721"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\app.py",
+        "scope": "create_app_from_config.openai_chat_handler",
+        "lineno": 365,
+        "args": [
+            "request",
+            "payload"
+        ],
+        "summarize": "The function handles chat completion requests by determining the appropriate route and provider based on the model, then processes the request accordingly, either as a streaming response or a regular chat response.",
+        "potential_vul_types": [
+            "SQLInjection: 0.746999979019165",
+            "XSS: 0.7099999785423279",
+            "XSS: 0.7070000171661377",
+            "XSS: 0.7039999961853027",
+            "XSS: 0.7020000219345093",
+            "PathTraversal: 0.6930000185966492",
+            "CommandInjection: 0.6930000185966492",
+            "XSS: 0.6919999718666077"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\app.py",
+        "scope": "create_app_from_config.openai_completions_handler",
+        "lineno": 383,
+        "args": [
+            "request",
+            "payload"
+        ],
+        "summarize": "The function handles POST requests to a specific endpoint, validates the route for the model provided in the payload, and then processes the request through a provider to generate or stream completions based on the payload's specifications.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7699999809265137",
+            "XSS: 0.7689999938011169",
+            "SQLInjection: 0.7519999742507935",
+            "XSS: 0.7519999742507935",
+            "XSS: 0.7409999966621399",
+            "XSS: 0.7400000095367432",
+            "SQLInjection: 0.7390000224113464",
+            "CommandInjection: 0.7369999885559082"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\app.py",
+        "scope": "create_app_from_config.openai_embeddings_handler",
+        "lineno": 401,
+        "args": [
+            "request",
+            "payload"
+        ],
+        "summarize": "The function handles HTTP POST requests to generate embeddings by validating the endpoint type and invoking the appropriate provider's embedding method based on the request payload.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7549999952316284",
+            "SQLInjection: 0.7450000047683716",
+            "XSS: 0.7369999885559082",
+            "XSS: 0.7350000143051147",
+            "CommandInjection: 0.7319999933242798",
+            "XSS: 0.7229999899864197",
+            "PathTraversal: 0.7200000286102295",
+            "SQLInjection: 0.718999981880188"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\providers\\openai.py",
+        "scope": "OpenAIProvider",
+        "lineno": 245,
+        "args": [],
+        "summarize": "The `OpenAIProvider` class is designed to interface with the OpenAI API. It initializes with a configuration, validates the API type, and constructs appropriate base URLs and headers for API requests. The class provides methods to send requests for various OpenAI services, such as chat, completions, and embeddings, either as streams or single responses. It handles different API types, processes payloads, and manages token usage and tool calls for extended functionality.",
+        "potential_vul_types": [
+            "SQLInjection: 0.7160000205039978",
+            "SQLInjection: 0.7059999704360962",
+            "SQLInjection: 0.6919999718666077",
+            "PathTraversal: 0.6899999976158142",
+            "XSS: 0.6790000200271606",
+            "CommandInjection: 0.6769999861717224",
+            "XSS: 0.6759999990463257",
+            "CommandInjection: 0.675000011920929"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\providers\\anthropic.py",
+        "scope": "AnthropicProvider",
+        "lineno": 228,
+        "args": [],
+        "summarize": "The class `AnthropicProvider` is designed to interact with the Anthropic API. It configures API headers and base URLs, determines endpoint URLs based on route types, and provides asynchronous methods to send requests for chat messages and completions, handling responses and streaming data as necessary.",
+        "potential_vul_types": [
+            "PathTraversal: 0.6930000185966492",
+            "SQLInjection: 0.6919999718666077",
+            "SQLInjection: 0.6790000200271606",
+            "XSS: 0.6779999732971191",
+            "SQLInjection: 0.6710000038146973",
+            "CommandInjection: 0.6679999828338623",
+            "CommandInjection: 0.6629999876022339",
+            "PathTraversal: 0.6600000262260437"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\providers\\cohere.py",
+        "scope": "CohereProvider",
+        "lineno": 325,
+        "args": [],
+        "summarize": "The class `CohereProvider` is designed to interface with the Cohere API. It provides methods to configure API requests, generate appropriate endpoints based on route types, and handle different types of interactions such as chat, completions, and embeddings. It includes both synchronous and asynchronous methods for sending requests and streaming responses, utilizing an adapter for data transformation between the application and API formats.",
+        "potential_vul_types": [
+            "SQLInjection: 0.671999990940094",
+            "PathTraversal: 0.6710000038146973",
+            "SQLInjection: 0.6710000038146973",
+            "SQLInjection: 0.6690000295639038",
+            "XSS: 0.6539999842643738",
+            "XSS: 0.6439999938011169",
+            "PathTraversal: 0.6389999985694885",
+            "XSS: 0.6299999952316284"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\providers\\ai21labs.py",
+        "scope": "AI21LabsProvider",
+        "lineno": 10,
+        "args": [],
+        "summarize": "The class `AI21LabsProvider` is designed to interface with the AI21 Labs API. It initializes with configuration settings and prepares authorization headers and a base URL for API requests. The `completions` method handles the processing and validation of input payloads for text completion requests, ensuring they conform to expected parameters. It then sends these requests to the AI21 Labs API and formats the response into a structured payload for further use.",
+        "potential_vul_types": [
+            "SQLInjection: 0.7080000042915344",
+            "SQLInjection: 0.7059999704360962",
+            "XSS: 0.7039999961853027",
+            "SQLInjection: 0.6980000138282776",
+            "PathTraversal: 0.6959999799728394",
+            "CommandInjection: 0.6880000233650208",
+            "PathTraversal: 0.6880000233650208",
+            "XSS: 0.6850000023841858"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\providers\\mosaicml.py",
+        "scope": "MosaicMLProvider",
+        "lineno": 13,
+        "args": [],
+        "summarize": "The class `MosaicMLProvider` is designed to interact with the MosaicML API to provide various AI-related services. It initializes with configuration validation and offers several asynchronous methods:\n\n- `_request`: Sends an HTTP request to the MosaicML API with authorization headers and returns the response.\n- `_parse_chat_messages_to_prompt`: Converts a list of chat messages into a formatted prompt string for processing.\n- `chat`: Processes a chat request payload, formats it into a prompt, sends it to the MosaicML API, and returns the chat response.\n- `completions`: Handles a text completion request payload, formats it, sends it to the MosaicML API, and returns the completion response.\n- `embeddings`: Processes an embeddings request payload, sends it to the MosaicML API, and returns the embeddings response.",
+        "potential_vul_types": [
+            "SQLInjection: 0.7250000238418579",
+            "SQLInjection: 0.7239999771118164",
+            "SQLInjection: 0.7059999704360962",
+            "XSS: 0.6980000138282776",
+            "CommandInjection: 0.6890000104904175",
+            "XSS: 0.6809999942779541",
+            "XSS: 0.6740000247955322",
+            "PathTraversal: 0.6729999780654907"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\providers\\palm.py",
+        "scope": "PaLMProvider",
+        "lineno": 11,
+        "args": [],
+        "summarize": "The class `PaLMProvider` interacts with a generative language API to provide functionalities for chat, text completion, and text embeddings. \n\n- The constructor initializes the provider with configuration validation.\n- The `_request` method sends HTTP requests to the API with necessary headers.\n- The `chat` method processes a chat payload, validates parameters, modifies the payload format, and sends a request to generate chat responses.\n- The `completions` method handles text completion requests by adjusting payload parameters and structure before sending a request to generate text completions.\n- The `embeddings` method processes text embedding requests, validates and reformats the payload, and sends a request to retrieve text embeddings.",
+        "potential_vul_types": [
+            "SQLInjection: 0.7400000095367432",
+            "SQLInjection: 0.699999988079071",
+            "SQLInjection: 0.6930000185966492",
+            "XSS: 0.6790000200271606",
+            "SQLInjection: 0.6700000166893005",
+            "SQLInjection: 0.6690000295639038",
+            "XSS: 0.6660000085830688",
+            "PathTraversal: 0.6579999923706055"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\providers\\gemini.py",
+        "scope": "GeminiProvider",
+        "lineno": 335,
+        "args": [],
+        "summarize": "The class `GeminiProvider` is designed to interact with the Gemini API for processing different types of AI model requests. It initializes with a specific configuration and validates it. The class provides headers and a base URL for API requests. It includes asynchronous methods for making requests to the API: `embeddings`, `completions`, and `chat`, each handling a specific type of payload and converting it to a model-specific format using an adapter class. The methods send requests to the API and convert the responses back into the expected format. The class also handles exceptions related to unsupported features like streaming.",
+        "potential_vul_types": [
+            "SQLInjection: 0.7149999737739563",
+            "SQLInjection: 0.7080000042915344",
+            "CommandInjection: 0.6690000295639038",
+            "CommandInjection: 0.6660000085830688",
+            "SQLInjection: 0.6639999747276306",
+            "XSS: 0.6589999794960022",
+            "SQLInjection: 0.6549999713897705",
+            "PathTraversal: 0.6480000019073486"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\providers\\mlflow.py",
+        "scope": "MlflowModelServingProvider",
+        "lineno": 53,
+        "args": [],
+        "summarize": "The class is responsible for interfacing with an MLflow model server to perform various machine learning tasks. It includes methods for processing and sending requests to the MLflow server and handling the responses for different types of tasks such as text completions, chat interactions, and embeddings. The methods ensure the payloads are formatted correctly, validate responses, and extract the necessary data for further use.",
+        "potential_vul_types": [
+            "XSS: 0.7870000004768372",
+            "SQLInjection: 0.7580000162124634",
+            "XSS: 0.7490000128746033",
+            "XSS: 0.7490000128746033",
+            "XSS: 0.7400000095367432",
+            "XSS: 0.7400000095367432",
+            "XSS: 0.7350000143051147",
+            "PathTraversal: 0.7279999852180481"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\providers\\bedrock.py",
+        "scope": "AmazonBedrockProvider",
+        "lineno": 170,
+        "args": [],
+        "summarize": "The class manages the configuration and interaction with the Amazon Bedrock service. It initializes with a configuration, checks and constructs AWS session and client arguments, and creates a client for the Bedrock service. It includes methods to handle client expiration, retrieve a client, and invoke a model on the Bedrock service. It also provides properties to determine the underlying provider and adapter class. The class contains a method to handle request payloads, transforming them for the Bedrock service and processing the response.",
+        "potential_vul_types": [
+            "SQLInjection: 0.6710000038146973",
+            "SQLInjection: 0.6679999828338623",
+            "PathTraversal: 0.6600000262260437",
+            "XSS: 0.6579999923706055",
+            "PathTraversal: 0.6579999923706055",
+            "SQLInjection: 0.6570000052452087",
+            "XSS: 0.656000018119812",
+            "PathTraversal: 0.6549999713897705"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\providers\\huggingface.py",
+        "scope": "HFTextGenerationInferenceServerProvider",
+        "lineno": 14,
+        "args": [],
+        "summarize": "The class `HFTextGenerationInferenceServerProvider` is responsible for interfacing with the Hugging Face Text Generation Inference server. It initializes with a configuration object, validates the configuration type, and sets up request headers. The `_request` method sends an asynchronous HTTP request to the specified path with a given payload. The `completions` method processes a payload for text generation, adjusting parameters and enforcing constraints, then sends a request to generate text and returns a structured response containing the generated text and usage details.",
+        "potential_vul_types": [
+            "SQLInjection: 0.7099999785423279",
+            "SQLInjection: 0.6970000267028809",
+            "PathTraversal: 0.6809999942779541",
+            "XSS: 0.6800000071525574",
+            "XSS: 0.6769999861717224",
+            "XSS: 0.6759999990463257",
+            "CodeInjection: 0.6759999990463257",
+            "PathTraversal: 0.6740000247955322"
+        ]
+    },
+    {
+        "file_path": "mlflow\\gateway\\providers\\togetherai.py",
+        "scope": "TogetherAIProvider",
+        "lineno": 293,
+        "args": [],
+        "summarize": "The class `TogetherAIProvider` interacts with the TogetherAI API to perform various tasks. It includes methods to generate embeddings, complete text, and handle chat interactions. The class supports both standard and streaming responses for completions and chat. It validates input payloads and constructs API requests with necessary headers and URLs based on the route type.",
+        "potential_vul_types": [
+            "SQLInjection: 0.7120000123977661",
+            "SQLInjection: 0.7099999785423279",
+            "SQLInjection: 0.7049999833106995",
+            "PathTraversal: 0.6809999942779541",
+            "XSS: 0.6690000295639038",
+            "XSS: 0.6679999828338623",
+            "XSS: 0.6650000214576721",
+            "CommandInjection: 0.6620000004768372"
+        ]
+    },
+    {
+        "file_path": "mlflow\\pyfunc\\scoring_server\\__init__.py",
+        "scope": "init.transformation",
+        "lineno": 504,
+        "args": [
+            "request"
+        ],
+        "summarize": "The function handles HTTP POST requests to perform inference on a batch of data, converting input data from CSV or JSON to a format suitable for generating predictions, and returning the predictions in JSON format.",
+        "potential_vul_types": [
+            "XSS: 0.7839999794960022",
+            "SQLInjection: 0.7670000195503235",
+            "XSS: 0.7620000243186951",
+            "CodeInjection: 0.7620000243186951",
+            "CommandInjection: 0.7559999823570251",
+            "CommandInjection: 0.7540000081062317",
+            "XSS: 0.7519999742507935",
+            "XSS: 0.75"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\otel_api.py",
+        "scope": "export_traces",
+        "lineno": 42,
+        "args": [
+            "request",
+            "response",
+            "x_mlflow_experiment_id",
+            "content_type"
+        ],
+        "summarize": "This function handles the export of trace spans using the OpenTelemetry protocol and logs them to an MLflow experiment. It validates the request's content type, parses the incoming protobuf data, converts the spans, and logs them to a tracking store, handling various exceptions along the way.",
+        "potential_vul_types": [
+            "XSS: 0.7609999775886536",
+            "XSS: 0.6869999766349792",
+            "SQLInjection: 0.6769999861717224",
+            "CommandInjection: 0.6740000247955322",
+            "XSS: 0.6690000295639038",
+            "SQLInjection: 0.6669999957084656",
+            "XSS: 0.6570000052452087",
+            "PathTraversal: 0.6570000052452087"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\__init__.py",
+        "scope": "serve_get_logged_model_artifact",
+        "lineno": 133,
+        "args": [
+            "model_id"
+        ],
+        "summarize": "The function serves an HTTP GET request to retrieve artifacts of a logged machine learning model based on the provided model identifier.",
+        "potential_vul_types": [
+            "PathTraversal: 0.699999988079071",
+            "XSS: 0.6899999976158142",
+            "PathTraversal: 0.6830000281333923",
+            "CommandInjection: 0.6700000166893005",
+            "XSS: 0.6669999957084656",
+            "CommandInjection: 0.6650000214576721",
+            "PathTraversal: 0.6639999747276306",
+            "XSS: 0.6639999747276306"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\__init__.py",
+        "scope": "serve_static_file",
+        "lineno": 141,
+        "args": [
+            "path"
+        ],
+        "summarize": "The function serves static files from a specified directory in response to HTTP requests.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7879999876022339",
+            "PathTraversal: 0.7490000128746033",
+            "PathTraversal: 0.7160000205039978",
+            "PathTraversal: 0.7059999704360962",
+            "PathTraversal: 0.6990000009536743",
+            "XSS: 0.6940000057220459",
+            "PathTraversal: 0.6919999718666077",
+            "PathTraversal: 0.6890000104904175"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\__init__.py",
+        "scope": "serve",
+        "lineno": 150,
+        "args": [],
+        "summarize": "The function serves as an endpoint for serving a static index.html file from a specified directory if it exists; otherwise, it returns a plain text response with instructions for resolving the issue.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7409999966621399",
+            "PathTraversal: 0.7310000061988831",
+            "XSS: 0.7129999995231628",
+            "PathTraversal: 0.7039999961853027",
+            "XSS: 0.7020000219345093",
+            "PathTraversal: 0.6840000152587891",
+            "XSS: 0.6800000071525574",
+            "XSS: 0.675000011920929"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "create_user",
+        "lineno": 994,
+        "args": [],
+        "summarize": "The function processes an HTTP request to create a new user by extracting username and password from JSON input and returns a JSON response with the created user details or an error message.",
+        "potential_vul_types": [
+            "XSS: 0.8460000157356262",
+            "XSS: 0.7900000214576721",
+            "PathTraversal: 0.781000018119812",
+            "XSS: 0.7680000066757202",
+            "PathTraversal: 0.7429999709129333",
+            "XSS: 0.7409999966621399",
+            "SQLInjection: 0.7390000224113464",
+            "XSS: 0.7390000224113464"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "get_user",
+        "lineno": 1012,
+        "args": [],
+        "summarize": "The function retrieves a user's information based on a username obtained from a request and returns it in JSON format.",
+        "potential_vul_types": [
+            "XSS: 0.777999997138977",
+            "SQLInjection: 0.7419999837875366",
+            "SQLInjection: 0.7360000014305115",
+            "SQLInjection: 0.7300000190734863",
+            "SQLInjection: 0.7239999771118164",
+            "SQLInjection: 0.7179999947547913",
+            "SQLInjection: 0.7149999737739563",
+            "XSS: 0.7139999866485596"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "update_user_password",
+        "lineno": 1019,
+        "args": [],
+        "summarize": "The function processes request data to update a user's password in a store.",
+        "potential_vul_types": [
+            "XSS: 0.7720000147819519",
+            "CodeInjection: 0.7210000157356262",
+            "XSS: 0.7129999995231628",
+            "SQLInjection: 0.7110000252723694",
+            "SQLInjection: 0.7099999785423279",
+            "XSS: 0.7070000171661377",
+            "SQLInjection: 0.7039999961853027",
+            "PathTraversal: 0.7020000219345093"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "update_user_admin",
+        "lineno": 1027,
+        "args": [],
+        "summarize": "This function updates the admin status of a user based on request parameters.",
+        "potential_vul_types": [
+            "SQLInjection: 0.7419999837875366",
+            "CodeInjection: 0.7400000095367432",
+            "XSS: 0.7360000014305115",
+            "SQLInjection: 0.7269999980926514",
+            "XSS: 0.722000002861023",
+            "CommandInjection: 0.7210000157356262",
+            "XSS: 0.7200000286102295",
+            "SQLInjection: 0.7179999947547913"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "delete_user",
+        "lineno": 1035,
+        "args": [],
+        "summarize": "The function processes a request to delete a user by retrieving the username from request parameters and invoking a deletion operation.",
+        "potential_vul_types": [
+            "SQLInjection: 0.7710000276565552",
+            "SQLInjection: 0.765999972820282",
+            "PathTraversal: 0.7620000243186951",
+            "PathTraversal: 0.7620000243186951",
+            "XSS: 0.7559999823570251",
+            "SQLInjection: 0.7319999933242798",
+            "CodeInjection: 0.7250000238418579",
+            "SQLInjection: 0.7210000157356262"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "create_experiment_permission",
+        "lineno": 1042,
+        "args": [],
+        "summarize": "The function creates a new permission entry for an experiment based on request parameters and returns the permission details in JSON format.",
+        "potential_vul_types": [
+            "XSS: 0.7599999904632568",
+            "PathTraversal: 0.6959999799728394",
+            "PathTraversal: 0.6940000057220459",
+            "XSS: 0.6890000104904175",
+            "PathTraversal: 0.6880000233650208",
+            "PathTraversal: 0.6880000233650208",
+            "XSS: 0.6830000281333923",
+            "CommandInjection: 0.6809999942779541"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "get_experiment_permission",
+        "lineno": 1051,
+        "args": [],
+        "summarize": "This function retrieves and returns the permission level for a specified experiment and user based on request parameters.",
+        "potential_vul_types": [
+            "XSS: 0.7099999785423279",
+            "PathTraversal: 0.6790000200271606",
+            "SQLInjection: 0.6740000247955322",
+            "XSS: 0.6700000166893005",
+            "PathTraversal: 0.6690000295639038",
+            "SQLInjection: 0.6660000085830688",
+            "PathTraversal: 0.6620000004768372",
+            "XSS: 0.6600000262260437"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "update_experiment_permission",
+        "lineno": 1059,
+        "args": [],
+        "summarize": "The function updates the permission level for a specific user on a given experiment based on request parameters.",
+        "potential_vul_types": [
+            "XSS: 0.7289999723434448",
+            "PathTraversal: 0.7120000123977661",
+            "SQLInjection: 0.7039999961853027",
+            "PathTraversal: 0.6980000138282776",
+            "SQLInjection: 0.6949999928474426",
+            "SQLInjection: 0.6890000104904175",
+            "XSS: 0.6850000023841858",
+            "SQLInjection: 0.6809999942779541"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "delete_experiment_permission",
+        "lineno": 1068,
+        "args": [],
+        "summarize": "The function removes a user's permission for a specific experiment based on request parameters and returns a response.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7429999709129333",
+            "SQLInjection: 0.7279999852180481",
+            "XSS: 0.722000002861023",
+            "SQLInjection: 0.7170000076293945",
+            "XSS: 0.7120000123977661",
+            "PathTraversal: 0.7070000171661377",
+            "SQLInjection: 0.7009999752044678",
+            "PathTraversal: 0.699999988079071"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "create_registered_model_permission",
+        "lineno": 1076,
+        "args": [],
+        "summarize": "The function processes request parameters to create a registered model permission and returns the result in a JSON response.",
+        "potential_vul_types": [
+            "XSS: 0.7360000014305115",
+            "XSS: 0.7020000219345093",
+            "XSS: 0.699999988079071",
+            "XSS: 0.6970000267028809",
+            "SQLInjection: 0.6880000233650208",
+            "PathTraversal: 0.6819999814033508",
+            "XSS: 0.6759999990463257",
+            "SQLInjection: 0.6759999990463257"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "get_registered_model_permission",
+        "lineno": 1085,
+        "args": [],
+        "summarize": "The function retrieves and returns the permissions associated with a registered model based on the provided model name and username from the request parameters.",
+        "potential_vul_types": [
+            "XSS: 0.6679999828338623",
+            "XSS: 0.6600000262260437",
+            "SQLInjection: 0.6520000100135803",
+            "PathTraversal: 0.6520000100135803",
+            "SQLInjection: 0.6449999809265137",
+            "SQLInjection: 0.6430000066757202",
+            "SQLInjection: 0.640999972820282",
+            "XSS: 0.6399999856948853"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "update_registered_model_permission",
+        "lineno": 1093,
+        "args": [],
+        "summarize": "The function updates permissions for a registered model based on user-provided request parameters.",
+        "potential_vul_types": [
+            "PathTraversal: 0.6980000138282776",
+            "XSS: 0.6850000023841858",
+            "SQLInjection: 0.6830000281333923",
+            "XSS: 0.6779999732971191",
+            "XSS: 0.6740000247955322",
+            "SQLInjection: 0.6729999780654907",
+            "XSS: 0.6669999957084656",
+            "XSS: 0.6660000085830688"
+        ]
+    },
+    {
+        "file_path": "mlflow\\server\\auth\\__init__.py",
+        "scope": "delete_registered_model_permission",
+        "lineno": 1102,
+        "args": [],
+        "summarize": "This function deletes the permission for a registered model based on the provided name and username from the request.",
+        "potential_vul_types": [
+            "SQLInjection: 0.675000011920929",
+            "SQLInjection: 0.6679999828338623",
+            "PathTraversal: 0.656000018119812",
+            "SQLInjection: 0.6499999761581421",
+            "PathTraversal: 0.6489999890327454",
+            "PathTraversal: 0.6430000066757202",
+            "XSS: 0.6430000066757202",
+            "SQLInjection: 0.640999972820282"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\local_artifact_repo.py",
+        "scope": "LocalArtifactRepository",
+        "lineno": 22,
+        "args": [],
+        "summarize": "The `LocalArtifactRepository` class manages artifacts stored as files in a local directory. It provides methods to log single or multiple artifacts, download artifacts to a specified destination or retrieve their local path, list artifacts in a directory, and delete specified artifacts. Additionally, it includes a method to download trace data as a dictionary, handling exceptions for missing or corrupted data.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7020000219345093",
+            "PathTraversal: 0.656000018119812",
+            "CommandInjection: 0.6309999823570251",
+            "PathTraversal: 0.6299999952316284",
+            "XSS: 0.6240000128746033",
+            "PathTraversal: 0.6230000257492065",
+            "XSS: 0.6190000176429749",
+            "PathTraversal: 0.6159999966621399"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\s3_artifact_repo.py",
+        "scope": "S3ArtifactRepository",
+        "lineno": 137,
+        "args": [],
+        "summarize": "The class `S3ArtifactRepository` provides functionality for managing MLflow artifacts using Amazon S3 as the backend storage. It supports operations like initializing the repository with S3 credentials, uploading single or multiple files, downloading files, listing artifacts, and deleting artifacts. The class also facilitates efficient handling of large files through multipart uploads, offering methods to initiate, complete, or abort such uploads. It leverages environment variables for configuration and utilizes boto3 for S3 operations, accommodating various authentication methods.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7009999752044678",
+            "XSS: 0.6729999780654907",
+            "CommandInjection: 0.671999990940094",
+            "SQLInjection: 0.6700000166893005",
+            "PathTraversal: 0.6690000295639038",
+            "XSS: 0.6660000085830688",
+            "XSS: 0.6660000085830688",
+            "XSS: 0.6639999747276306"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\r2_artifact_repo.py",
+        "scope": "R2ArtifactRepository",
+        "lineno": 7,
+        "args": [],
+        "summarize": "The class `R2ArtifactRepository` is designed to handle the storage and retrieval of artifacts on Cloudflare R2. It initializes the connection to the R2 storage service using provided credentials and a specific URI, converting the R2 URI to a format compatible with S3 endpoints. The class also includes a method to determine the region of the R2 bucket and a utility method to parse R2-compliant URIs.",
+        "potential_vul_types": [
+            "CommandInjection: 0.6470000147819519",
+            "PathTraversal: 0.6299999952316284",
+            "PathTraversal: 0.6259999871253967",
+            "XSS: 0.6230000257492065",
+            "XSS: 0.6230000257492065",
+            "PathTraversal: 0.6209999918937683",
+            "CommandInjection: 0.6129999756813049",
+            "PathTraversal: 0.6129999756813049"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\gcs_artifact_repo.py",
+        "scope": "GCSArtifactRepository",
+        "lineno": 36,
+        "args": [],
+        "summarize": "The class provides functionality for storing and managing artifacts on Google Cloud Storage. It includes methods for uploading single or multiple files, listing stored artifacts, downloading files, and deleting artifacts. It also supports multipart uploads, allowing for the creation, completion, and abortion of multipart upload sessions. The class manages authentication and client connections to Google Cloud Storage, with options for credential refresh and handling anonymous access.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7070000171661377",
+            "XSS: 0.7059999704360962",
+            "PathTraversal: 0.7049999833106995",
+            "PathTraversal: 0.675000011920929",
+            "PathTraversal: 0.671999990940094",
+            "PathTraversal: 0.6710000038146973",
+            "XSS: 0.6679999828338623",
+            "SQLInjection: 0.6669999957084656"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\azure_blob_artifact_repo.py",
+        "scope": "AzureBlobArtifactRepository",
+        "lineno": 32,
+        "args": [],
+        "summarize": "The class `AzureBlobArtifactRepository` manages the storage and retrieval of artifacts in Azure Blob Storage. It initializes with a specified URI and connects using various Azure authentication methods. The class provides methods to log single or multiple artifacts to the storage, list existing artifacts, download files, delete artifacts, and handle multipart uploads. It parses URIs to interact with the storage and uses Azure's Blob Service Client for operations.",
+        "potential_vul_types": [
+            "XSS: 0.6690000295639038",
+            "PathTraversal: 0.6690000295639038",
+            "PathTraversal: 0.6629999876022339",
+            "CommandInjection: 0.6579999923706055",
+            "PathTraversal: 0.6520000100135803",
+            "SQLInjection: 0.6510000228881836",
+            "PathTraversal: 0.6489999890327454",
+            "XSS: 0.6430000066757202"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\ftp_artifact_repo.py",
+        "scope": "FTPArtifactRepository",
+        "lineno": 15,
+        "args": [],
+        "summarize": "The class manages the storage and retrieval of artifacts in a remote directory using FTP. \n\n- The constructor initializes the FTP connection configuration based on the given URI.\n- The `get_ftp_client` method establishes an FTP connection and yields it for use.\n- The `_is_dir` method checks if a specified path is a directory on the FTP server.\n- The `_mkdir` method creates a directory on the FTP server if it does not exist.\n- The `_size` method retrieves the size of a file on the FTP server.\n- The `log_artifact` method uploads a single file to the specified path on the FTP server.\n- The `log_artifacts` method uploads all files from a local directory to the specified path on the FTP server.\n- The `_is_directory` method checks if a specified artifact path is a directory on the FTP server.\n- The `list_artifacts` method lists files and directories at a specified path on the FTP server and returns their metadata.\n- The `_download_file` method downloads a file from the FTP server to a local path.\n- The `delete_artifacts` method is not implemented.",
+        "potential_vul_types": [
+            "PathTraversal: 0.718999981880188",
+            "PathTraversal: 0.7089999914169312",
+            "XSS: 0.7039999961853027",
+            "PathTraversal: 0.7009999752044678",
+            "PathTraversal: 0.6930000185966492",
+            "SQLInjection: 0.6890000104904175",
+            "PathTraversal: 0.6859999895095825",
+            "PathTraversal: 0.6840000152587891"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\sftp_artifact_repo.py",
+        "scope": "SFTPArtifactRepository",
+        "lineno": 39,
+        "args": [],
+        "summarize": "The class `SFTPArtifactRepository` manages artifacts in a remote directory using SFTP.\n\n- `__init__`: Initializes the repository with SFTP connection settings parsed from a URI and optional SSH configurations.\n- `log_artifact`: Uploads a local file to the remote SFTP server at a specified path.\n- `log_artifacts`: Uploads all files from a local directory to the remote SFTP server at a specified path.\n- `_is_directory`: Checks if a specified path on the remote SFTP server is a directory.\n- `list_artifacts`: Lists files and directories at a specified path on the remote SFTP server, returning their metadata.\n- `_download_file`: Downloads a file from the remote SFTP server to a local path.\n- `delete_artifacts`: Deletes files or directories from the remote SFTP server at a specified path.\n- `_delete_inner`: Recursively deletes files and directories from the remote SFTP server.",
+        "potential_vul_types": [
+            "PathTraversal: 0.6899999976158142",
+            "PathTraversal: 0.6710000038146973",
+            "SQLInjection: 0.6700000166893005",
+            "SQLInjection: 0.6600000262260437",
+            "CommandInjection: 0.6589999794960022",
+            "SQLInjection: 0.6520000100135803",
+            "PathTraversal: 0.6510000228881836",
+            "CommandInjection: 0.6510000228881836"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\hdfs_artifact_repo.py",
+        "scope": "HdfsArtifactRepository",
+        "lineno": 21,
+        "args": [],
+        "summarize": "The class `HdfsArtifactRepository` manages artifact storage and retrieval on HDFS. \n\n- The `__init__` method initializes the repository with a given URI, resolving connection parameters.\n- The `log_artifact` method uploads a single local file to HDFS at a specified path.\n- The `log_artifacts` method uploads all files from a local directory to HDFS, creating necessary directories.\n- The `list_artifacts` method lists files and directories under a specified path in the HDFS repository.\n- The `_is_directory` method checks if a given path in HDFS is a directory.\n- The `_download_file` method downloads a file from HDFS to a local path.\n- The `delete_artifacts` method deletes files or directories from HDFS at a specified path.",
+        "potential_vul_types": [
+            "PathTraversal: 0.6840000152587891",
+            "PathTraversal: 0.6840000152587891",
+            "PathTraversal: 0.6669999957084656",
+            "PathTraversal: 0.6669999957084656",
+            "SQLInjection: 0.6660000085830688",
+            "XSS: 0.6610000133514404",
+            "XSS: 0.6610000133514404",
+            "CommandInjection: 0.6579999923706055"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\runs_artifact_repo.py",
+        "scope": "RunsArtifactRepository",
+        "lineno": 21,
+        "args": [],
+        "summarize": "The `RunsArtifactRepository` class manages artifacts related to a specific run using URIs. It provides methods to log single or multiple artifacts, check if a path is a directory, list artifacts under a given path, and download artifacts to a local directory. Additionally, it supports handling model artifacts associated with a run, including listing and downloading them. The class also includes functionality to delete artifacts.",
+        "potential_vul_types": [
+            "PathTraversal: 0.6930000185966492",
+            "XSS: 0.6890000104904175",
+            "PathTraversal: 0.6840000152587891",
+            "CommandInjection: 0.6769999861717224",
+            "PathTraversal: 0.6549999713897705",
+            "PathTraversal: 0.6489999890327454",
+            "PathTraversal: 0.6489999890327454",
+            "XSS: 0.6489999890327454"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\models_artifact_repo.py",
+        "scope": "ModelsArtifactRepository",
+        "lineno": 34,
+        "args": [],
+        "summarize": "The class manages artifact repositories associated with model versions in a model registry, resolving artifact paths to absolute URIs and instantiating appropriate artifact repositories based on the URI type. It provides methods for logging artifacts, listing artifacts, downloading artifacts, and handling metadata related to registered models.",
+        "potential_vul_types": [
+            "PathTraversal: 0.6589999794960022",
+            "PathTraversal: 0.6520000100135803",
+            "XSS: 0.6439999938011169",
+            "PathTraversal: 0.6389999985694885",
+            "CommandInjection: 0.6380000114440918",
+            "PathTraversal: 0.6269999742507935",
+            "XSS: 0.625",
+            "XSS: 0.625"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\azure_data_lake_artifact_repo.py",
+        "scope": "AzureDataLakeArtifactRepository",
+        "lineno": 69,
+        "args": [],
+        "summarize": "The class manages artifacts on Azure Data Lake Storage Gen2. It initializes with an artifact URI and credentials, parsing and refreshing them as needed. It logs artifacts by uploading files to a specified path, lists artifacts by retrieving directory contents, and downloads files from the cloud. The class supports multipart uploads for large files and generates presigned URIs for file access. It does not support deleting artifacts.",
+        "potential_vul_types": [
+            "PathTraversal: 0.6890000104904175",
+            "XSS: 0.6850000023841858",
+            "PathTraversal: 0.6769999861717224",
+            "CommandInjection: 0.6610000133514404",
+            "CommandInjection: 0.6600000262260437",
+            "PathTraversal: 0.6600000262260437",
+            "PathTraversal: 0.6549999713897705",
+            "XSS: 0.6539999842643738"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\artifact\\http_artifact_repo.py",
+        "scope": "HttpArtifactRepository",
+        "lineno": 35,
+        "args": [],
+        "summarize": "The `HttpArtifactRepository` class manages the storage and retrieval of artifacts in a remote storage system using HTTP requests. \n\n- `log_artifact`: Uploads a single artifact file to the remote storage, using multipart upload for large files if supported.\n- `log_artifacts`: Uploads all files in a specified local directory to the remote storage.\n- `list_artifacts`: Retrieves a list of artifacts from the remote storage, returning their metadata.\n- `_download_file`: Downloads a file from the remote storage to a local path.\n- `delete_artifacts`: Deletes artifacts from the remote storage.\n- `_construct_mpu_uri_and_path`: Constructs the URI and endpoint for multipart upload operations.\n- `create_multipart_upload`: Initiates a multipart upload session for a file.\n- `complete_multipart_upload`: Completes a multipart upload session after all parts have been uploaded.\n- `abort_multipart_upload`: Aborts a multipart upload session.\n- `_upload_part`: Uploads a part of a file in a multipart upload session.\n- `_try_multipart_upload`: Attempts to perform a multipart upload for a file, handling errors and retries.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7390000224113464",
+            "PathTraversal: 0.7260000109672546",
+            "XSS: 0.7239999771118164",
+            "XSS: 0.6980000138282776",
+            "PathTraversal: 0.6919999718666077",
+            "CommandInjection: 0.6909999847412109",
+            "XSS: 0.6890000104904175",
+            "PathTraversal: 0.6880000233650208"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\_unity_catalog\\registry\\rest_store.py",
+        "scope": "UcModelRegistryStore",
+        "lineno": 359,
+        "args": [],
+        "summarize": "The `UcModelRegistryStore` class provides an interface for interacting with a remote model registry server via REST API calls. It facilitates operations related to registered models and model versions, including creating, updating, renaming, deleting, and searching for registered models and model versions. The class also supports setting and deleting tags and aliases for both registered models and model versions. Additionally, it includes methods for managing prompt-related operations such as creating, searching, deleting prompts, and linking prompt versions to models, traces, and runs within Unity Catalog. The class handles various aspects of model version management, including uploading model artifacts, handling temporary credentials, and managing model version dependencies.",
+        "potential_vul_types": [
+            "XSS: 0.6650000214576721",
+            "SQLInjection: 0.6650000214576721",
+            "XSS: 0.6510000228881836",
+            "SQLInjection: 0.6430000066757202",
+            "XSS: 0.6420000195503235",
+            "SQLInjection: 0.6399999856948853",
+            "SQLInjection: 0.6399999856948853",
+            "Deserialization: 0.6330000162124634"
+        ]
+    },
+    {
+        "file_path": "mlflow\\store\\_unity_catalog\\registry\\uc_oss_rest_store.py",
+        "scope": "UnityCatalogOssStore",
+        "lineno": 72,
+        "args": [],
+        "summarize": "The `UnityCatalogOssStore` class is a client interface for interacting with an Open Source Unity Catalog Server through REST API calls. It provides methods for managing registered models and model versions, including creating, updating, deleting, and searching for models and model versions. It also includes methods for handling model version artifacts and obtaining temporary credentials for model version operations. Some methods are not implemented, indicating that certain functionalities are planned but not yet available.",
+        "potential_vul_types": [
+            "XSS: 0.6449999809265137",
+            "CommandInjection: 0.6269999742507935",
+            "PathTraversal: 0.625",
+            "XSS: 0.6209999918937683",
+            "Deserialization: 0.6200000047683716",
+            "SQLInjection: 0.6119999885559082",
+            "SQLInjection: 0.6110000014305115",
+            "PathTraversal: 0.6110000014305115"
+        ]
+    }
+]

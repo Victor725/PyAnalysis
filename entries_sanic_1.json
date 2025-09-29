@@ -1,0 +1,95 @@
+[
+    {
+        "file_path": "sanic.py",
+        "scope": "handler",
+        "lineno": 32,
+        "args": [
+            "request"
+        ],
+        "summarize": "The function handles incoming HTTP POST requests with streaming data, processes the request body by replacing certain characters, and streams the modified data back in the response.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7850000262260437",
+            "XSS: 0.7789999842643738",
+            "CommandInjection: 0.7789999842643738",
+            "PathTraversal: 0.7699999809265137",
+            "XSS: 0.7620000243186951",
+            "SQLInjection: 0.7570000290870667",
+            "PathTraversal: 0.7519999742507935",
+            "XSS: 0.7509999871253967"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "bq_put_handler",
+        "lineno": 47,
+        "args": [
+            "request"
+        ],
+        "summarize": "The function reads data from a streaming request, decodes it, replaces occurrences of \"1\" with \"A\" in the text, and returns the modified result as a response.",
+        "potential_vul_types": [
+            "PathTraversal: 0.7210000157356262",
+            "CommandInjection: 0.7160000205039978",
+            "SQLInjection: 0.7020000219345093",
+            "XSS: 0.6970000267028809",
+            "XSS: 0.6919999718666077",
+            "PathTraversal: 0.6869999766349792",
+            "PathTraversal: 0.6859999895095825",
+            "XSS: 0.6840000152587891"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "bq_post_handler",
+        "lineno": 59,
+        "args": [
+            "request"
+        ],
+        "summarize": "The function processes incoming request data, reads it in chunks, replaces occurrences of \"1\" with \"A\" in the decoded string, and returns the modified content as a response.",
+        "potential_vul_types": [
+            "CommandInjection: 0.7179999947547913",
+            "XSS: 0.6959999799728394",
+            "XSS: 0.6959999799728394",
+            "XSS: 0.6949999928474426",
+            "PathTraversal: 0.6949999928474426",
+            "XSS: 0.6940000057220459",
+            "PathTraversal: 0.6869999766349792",
+            "PathTraversal: 0.6859999895095825"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "SimpleView",
+        "lineno": 14,
+        "args": [],
+        "summarize": "The method handles incoming POST requests by asynchronously reading and processing the request body from a streaming input, accumulating it into a string.",
+        "potential_vul_types": [
+            "CommandInjection: 0.7599999904632568",
+            "XSS: 0.7509999871253967",
+            "PathTraversal: 0.746999979019165",
+            "XSS: 0.7369999885559082",
+            "PathTraversal: 0.7350000143051147",
+            "PathTraversal: 0.7329999804496765",
+            "XSS: 0.7260000109672546",
+            "XSS: 0.7250000238418579"
+        ]
+    },
+    {
+        "file_path": "sanic.py",
+        "scope": "post_handler",
+        "lineno": 73,
+        "args": [
+            "request"
+        ],
+        "summarize": "The function reads data from an incoming request in chunks until all data is received, decodes it from bytes to a UTF-8 string, and returns the combined string as a response.",
+        "potential_vul_types": [
+            "PathTraversal: 0.753000020980835",
+            "PathTraversal: 0.7369999885559082",
+            "CommandInjection: 0.734000027179718",
+            "PathTraversal: 0.7139999866485596",
+            "PathTraversal: 0.7120000123977661",
+            "XSS: 0.7099999785423279",
+            "PathTraversal: 0.7089999914169312",
+            "SQLInjection: 0.7070000171661377"
+        ]
+    }
+]

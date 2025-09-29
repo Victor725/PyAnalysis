@@ -1,1 +1,1 @@
-This function handles POST requests to evaluate mathematical or logical expressions provided in the request body and returns the evaluation result. If the input is missing or invalid, it returns an error message.
+This function handles HTTP POST requests to evaluate mathematical or logical expressions provided in the request body. It retrieves the expression from the request, evaluates it within a specified execution context, and returns the result. If the expression is missing or an error occurs during evaluation, it returns an error message.

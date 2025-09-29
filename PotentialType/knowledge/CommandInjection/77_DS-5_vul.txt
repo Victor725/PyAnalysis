@@ -1,1 +1,1 @@
-The function checks for running processes that match a specified name and returns details about those processes, such as user, process ID, CPU usage, memory usage, and the command used to start the process.
+The function checks for running processes that match a given name and returns a list of details about these processes. It is vulnerable to command injection due to its use of shell execution with unsanitized input.

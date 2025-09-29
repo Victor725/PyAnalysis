@@ -19,11 +19,11 @@ def ask_LLM_summary(case_file: Path, model = "gpt-4o", provider = "openai"):
 Summarize the following Python function or class at a high level of abstraction.
 
 Guidelines:
-Focus only on what the code is designed to do, not how it does it.
+Focus only on the overall purpose and behavior of the code.
 If the input is a function, provide one concise summary of its overall role.
 If the input is a class, provide a separate summary for each method, focusing on what it does.
 Avoid mentioning variable names, parameter names, or implementation details.
-Emphasize what the function or method achieves, not how it is implemented.
+The goal is to capture what it does, not how it does it.
 
 Here is the code:
 

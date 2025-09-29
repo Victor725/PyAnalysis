@@ -1,1 +1,1 @@
-This function handles the creation of a new user account by processing incoming data, storing it in a database, and responding with a success message. It also handles the case where the username already exists by raising an error.
+The function processes an HTTP POST request to register a new user by extracting user information from the request body, storing it in a database, and returning a success response. If the username already exists, it raises an error.

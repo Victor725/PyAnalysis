@@ -143,11 +143,11 @@ If it does not, just answer strictly with "!No!". Do not provide any explanation
 If it does, summarize the following Python function or class at a high level of abstraction.
 
 Guidelines:
-Focus only on what the code is designed to do, not how it does it.
+Focus only on the overall purpose and behavior of the code.
 If the input is a function, provide one concise summary of its overall role.
 If the input is a class, provide a separate summary for each method, focusing on what it does.
 Avoid mentioning variable names, parameter names, or implementation details.
-Emphasize what the function or method achieves, not how it is implemented.
+The goal is to capture what it does, not how it does it.
 
 Here is the code:
 
@@ -170,7 +170,7 @@ Here is the code:
     
     async def getEntry(self):
         
-        self.documents = read_all_documents(self.path)
+        self.documents = read_all_documents(self.path, code_extensions = [".py"])
         
         compiled_frameworks = {}
         for framework in frameworks.keys():
@@ -260,11 +260,17 @@ Here is the code:
             db_save_dir = os.path.join(os.path.dirname(self.potentialVulType_kb), "rag")
             request = self.build_req(summarize, include_dirs=include_dirs, repo_url=self.potentialVulType_kb, db_save_dir=db_save_dir)
             
-            docs_by_file = asyncio.run(rag_search(request, top_k=3))
+            docs, scores = asyncio.run(rag_search(request, top_k=8))
             self.entries[i]['potential_vul_types'] = []
-            for path in docs_by_file.keys():
-                self.entries[i]['potential_vul_types'].append(os.path.dirname(path))
-            self.entries[i]['potential_vul_types'] = list(set(self.entries[i]['potential_vul_types']))
+            
+            print(f"Entry scope: {entry['scope']}")
+            for j, doc in enumerate(docs):
+                path = doc.meta_data.get('file_path', 'unknown')
+                print(f"Retrieved doc for potential type: {path}")
+                self.entries[i]['potential_vul_types'].append(f"{os.path.dirname(path)}: {scores[j]}")
+            # self.entries[i]['potential_vul_types'] = list(set(self.entries[i]['potential_vul_types']))
+            print("-------------------")
+
 
     def findVul(self):
         

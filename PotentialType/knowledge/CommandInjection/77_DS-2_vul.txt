@@ -1,1 +1,1 @@
-The function executes a network traceroute command to trace the route packets take to a specified target host and returns the result as a string. It is vulnerable to command injection due to the way it incorporates the target host into the command.
+This function executes a traceroute command to determine the network path to a specified host, capturing and returning the output. However, it is vulnerable to command injection due to the direct use of user input in a shell command.

@@ -131,7 +131,7 @@ def download_repo(repo_url: str, local_path: str, type: str = "github", access_t
 # Alias for backward compatibility
 download_github_repo = download_repo
 
-def read_all_documents(path: str, is_ollama_embedder: bool = None, excluded_dirs: List[str] = None, excluded_files: List[str] = None,
+def read_all_documents(path: str, code_extensions = [".txt"], is_ollama_embedder: bool = None, excluded_dirs: List[str] = None, excluded_files: List[str] = None,
                       included_dirs: List[str] = None, included_files: List[str] = None):
     """
     Recursively reads all documents in a directory and its subdirectories.
@@ -157,7 +157,7 @@ def read_all_documents(path: str, is_ollama_embedder: bool = None, excluded_dirs
     # code_extensions = [".py", ".js", ".ts", ".java", ".cpp", ".c", ".h", ".hpp", ".go", ".rs",
     #                    ".jsx", ".tsx", ".html", ".css", ".php", ".swift", ".cs"]
     # LIU: only consider py files
-    code_extensions = [".py", ".txt"]
+    # code_extensions = [".py", ".txt"]
     doc_extensions = [".md", ".txt", ".rst", ".json", ".yaml", ".yml"]
 
     # Determine filtering mode: inclusion or exclusion

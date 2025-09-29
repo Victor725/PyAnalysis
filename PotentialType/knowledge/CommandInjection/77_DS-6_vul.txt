@@ -1,1 +1,1 @@
-The function performs an HTTP POST request to a specified URL, optionally including data, and returns the server's response as a string.
+This function executes a HTTP POST request to a specified URL using the curl command-line tool and optionally includes data in the request. It captures and returns the response from the command execution. However, it is vulnerable to command injection due to the way it constructs the command string.

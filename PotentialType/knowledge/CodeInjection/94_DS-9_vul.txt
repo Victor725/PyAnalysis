@@ -1,1 +1,1 @@
-The function evaluates a given rule expression using potentially unsafe code execution, stores the rule by name, and returns the result of the evaluation or an error message if an exception occurs.
+This function evaluates a rule expression in the context of provided data and stores the rule under a specified name. It returns the result of the evaluation or an error message if an exception occurs. The function is vulnerable to code injection due to its use of dynamic execution.

@@ -1,1 +1,1 @@
-This function calculates the total price for a specified product type by applying a discount formula provided as a string, which is executed in a potentially unsafe manner.
+This function calculates the total price for a given product type by applying a discount logic to the base price and quantity, but it is vulnerable to code injection due to the use of an unsafe evaluation method for processing the discount logic.

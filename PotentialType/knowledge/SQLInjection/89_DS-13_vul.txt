@@ -1,1 +1,1 @@
-The function provides an endpoint for searching employees in a database based on a query parameter, returning a list of employees whose names or emails match the search term.
+The function provides a web API endpoint that allows users to search for employees in a database by name or email. It retrieves the search query from the request parameters and uses it to perform a database search, returning the matching employee records in JSON format. However, the function is vulnerable to SQL injection due to the way it constructs the SQL query with user input.

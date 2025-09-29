@@ -1,1 +1,1 @@
-The function is designed to handle a search request for books based on a query parameter. It retrieves books from a database where the title or author matches the search term and returns the results in JSON format.
+This function handles a GET request to search for books in a database based on a query parameter. It retrieves and returns books whose titles or authors match the search term. However, it is vulnerable to SQL injection due to the way the query is constructed.

@@ -1,1 +1,1 @@
-The function is designed to apply a specified filter to an image and save the modified image to a specified or default output location.
+The function applies a specified filter to an image and saves the modified image to a specified directory. If no output name is provided, it generates one based on the input image's name and the filter type. The function uses a command-line utility to perform the image processing, which presents a command injection vulnerability due to the way it constructs and executes the command.
