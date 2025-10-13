@@ -272,20 +272,40 @@ Here is the code:
             print("-------------------")
 
 
-    def findVul(self):
+    def detect_vul(self):
         
+        strategies = self.load_strategies()
+        
+        for i, entry in enumerate(self.entries):
+            potTypes = entry["potential_vul_types"]
+            potTypes = [pt.split(":")[0] for pt in potTypes]
+            # detect under strategy, output if vulnerable
+            for t in potTypes[0:3]:
+                # get detect strategy
+                strategy = strategies[t]
+                # get code
+                
+                # detect vuln.
+                
+
+
+    def findVul(self):
         # get entries of projs
         entries = asyncio.run(self.getEntry())
         
         entry_file = "./entries.json"
         with open(entry_file, "w") as f:
-            json.dump(entries, f)
+            json.dump(entries, f, indent=4)
         
         # get vul in entries
         # find potential vul types
         self.gen_potVulType()
         with open(entry_file, "w") as f:
-            json.dump(entries, f)
+            json.dump(self.entries, f, indent=4)
+            
+        
+        self.detect_vul()        
+        
         
         
         
