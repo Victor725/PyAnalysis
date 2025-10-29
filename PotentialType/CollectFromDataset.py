@@ -82,7 +82,7 @@ def get_vul_type(vul_type:str):
     
     return Type
 
-    
+
 def main():
     case_df = pd.read_csv(CASE_CSV_PATH)
     for index, row in case_df.iterrows():

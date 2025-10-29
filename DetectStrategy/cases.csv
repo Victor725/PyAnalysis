@@ -1,0 +1,106 @@
+﻿Vul,CWE,EntryPoint,VulLocation,Type
+https://www.cve.org/CVERecord?id=CVE-2024-11662,94;664;707,apps/api/views/deploy_api.py:deploy_host_vars,apps/api/views/deploy_api.py:deploy_host_vars,code injection
+https://www.cve.org/CVERecord?id=CVE-2023-38941,94;664;707,apps/sspanel/admin_views.py:GoodsCreateView.post,apps/sspanel/admin_views.py:GoodsCreateView.post,code injection
+94_DS-1,94,add_item,add_item,code injection
+94_DS-2,94,vulnerable_filter,vulnerable_filter,code injection
+94_DS-3,94,TemplateHandler.post,TemplateHandler.post.vulnerable_render,code injection
+94_DS-4,94,PricingEngine.vulnerable_calculate,PricingEngine.vulnerable_calculate,code injection
+94_DS-5,94,ReportGenerator.vulnerable_generate_report,ReportGenerator.vulnerable_generate_report,code injection
+94_DS-6,94,ConfigManager.vulnerable_apply_config,ConfigManager.vulnerable_apply_config,code injection
+94_DS-7,94,WorkflowApp.execute,WorkflowEngine.vulnerable_execute_step,code injection
+94_DS-8,94,ResponseProcessor.vulnerable_process_response,ResponseProcessor.vulnerable_process_response,code injection
+94_DS-9,94,RuleEngine.vulnerable_evaluate_rule,RuleEngine.vulnerable_evaluate_rule,code injection
+94_DS-10,94,transform_data,DataTransformer.vulnerable_transform,code injection
+94_DS-12,94,admin_actions,admin_actions,code injection
+94_DS-13,94,dynamic_filter,dynamic_filter,code injection
+94_DS-14,94,execute_operation,execute_operation,code injection
+94_DS-16,94,DynamicTemplateRenderer._compile_template,DynamicTemplateRenderer._compile_template,code injection
+94_DS-17,94,evaluate_math,evaluate_math,code injection
+94_DS-18,94,calculate_endpoint,calculate_endpoint,code injection
+94_DS-19,94,evaluate_expression,evaluate_expression,code injection
+94_DS-20,94,direct_validate,direct_validate,code injection
+https://www.cve.org/CVERecord?id=CVE-2021-43857,78;707,gerapy/server/core/views.py:project_configure; gerapy/server/core/views.py:project_clone; gerapy/server/core/views.py:project_parse,gerapy/server/core/views.py:project_configure; gerapy/server/core/views.py:project_clone; gerapy/server/core/views.py:project_parse,OS Command Injection
+77_DS-1,77,FileManager.search_files,FileManager.search_files,OS Command Injection
+77_DS-2,77,NetworkDiagnostics.trace_route,NetworkDiagnostics.trace_route,OS Command Injection
+77_DS-3,77,LogAnalyzer.search_logs,LogAnalyzer.search_logs,OS Command Injection
+77_DS-4,77,DatabaseManager.create_backup,DatabaseManager.create_backup,OS Command Injection
+77_DS-5,77,SystemMonitor.check_process,SystemMonitor.check_process,OS Command Injection
+77_DS-6,77,WebhookTester.test_curl_request,WebhookTester.test_curl_request,OS Command Injection
+77_DS-7,77,DocumentConverter.convert_file,DocumentConverter.convert_file,OS Command Injection
+77_DS-8,77,VideoProcessor.process_video,VideoProcessor.process_video,OS Command Injection
+77_DS-9,77,DNSTool.custom_query,DNSTool.custom_query,OS Command Injection
+77_DS-10,77,NetworkConfigurator.configure_kernel_param,NetworkConfigurator.configure_kernel_param,OS Command Injection
+77_DS-11,77,FileCompressor.compress_file,FileCompressor.compress_file,OS Command Injection
+77_DS-12,77,ImageProcessor.apply_filter,ImageProcessor.apply_filter,OS Command Injection
+77_DS-13,77,DatabaseBackupTool.create_backup,DatabaseBackupTool.create_backup,OS Command Injection
+77_DS-14,77,NetworkDiagnosticTool.run_diagnotstic,NetworkDiagnosticTool.run_diagnotstic,OS Command Injection
+77_DS-15,77,DocumentConverter.convert_document,DocumentConverter.convert_document,OS Command Injection
+77_DS-16,77,SystemMonitor.execute_system_check,SystemMonitor.execute_system_check,OS Command Injection
+77_DS-17,77,WebsiteScreenshot.capture_website,WebsiteScreenshot.capture_website,OS Command Injection
+77_DS-18,77,VideoProcessor.process_video,VideoProcessor.process_video,OS Command Injection
+77_DS-19,77,DNSLookupTool.perform_lookup,DNSLookupTool.perform_lookup,OS Command Injection
+77_DS-20,77,SystemInfoTool.get_system_info,SystemInfoTool.get_system_info,OS Command Injection
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-50943,502;664,airflow/api_connexion/endpoints/xcom_endpoint.py:get_xcom_entry,airflow/models/xcom.py:BaseXCom._deserialize_value,Deserialization
+502_DS-1,502,RequestHandler.do_POST,AnalyticsConfig.load_from_pickle,Deserialization
+502_DS-2,502,update_config,update_config,Deserialization
+502_DS-3,502,DeviceConfigManager.store_config,DeviceConfigManager.store_config,Deserialization
+502_DS-4,502,TaskWorker._execute_task,TaskWorker._execute_task,Deserialization
+502_DS-5,502,upload_plugin,FileProcessor.load_processing_plugin,Deserialization
+502_DS-6,502,upload_rules,TransactionProcessor.load_validation_rules,Deserialization
+502_DS-7,502,upload_module,DataAnalyzer.load_analysis_module,Deserialization
+502_DS-8,502,upload_model,ModelServer.load_model,Deserialization
+502_DS-9,502,CacheNode.store_data,CacheNode.store_data,Deserialization
+502_DS-10,502,IoTDeviceManager.process_firmware_update,IoTDeviceManager.process_firmware_update,Deserialization
+502_DS-14,502,TaskWorker._handle_client,TaskWorker._handle_client,Deserialization
+502_DS-15,502,CacheNode._handle_connection,CacheNode._handle_connection,Deserialization
+https://www.cve.org/CVERecord?id=CVE-2025-27519,22;664,backend/server/routers/internal.py:upload_to_docker_directory,backend/server/routers/internal.py:upload_to_docker_directory,path traversal
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-5926,22;664,devika.py:project_files,src/state.py:AgentState.get_project_files,path traversal
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-5548,22;664,src/apis/project.py:create_project; src/apis/project.py:delete_project; src/apis/project.py:download_project; src/apis/project.py:download_project_pdf,src/apis/project.py:create_project; src/apis/project.py:delete_project; src/apis/project.py:download_project; src/apis/project.py:download_project_pdf,path traversal
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-1561,22;664,gradio/routes.py:App.component_server,gradio/routes.py:App.component_server,path traversal
+https://www.cve.org/CVERecord?id=CVE-2023-50265,22;664,bazarr/app/ui.py:swaggerui_static,bazarr/app/ui.py:swaggerui_static,path traversal
+https://www.cve.org/CVERecord?id=CVE-2023-50264,22;664,bazarr/app/ui.py:backup_download,bazarr/app/ui.py:backup_download,path traversal
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-42819,22;664,apps/ops/api/playbook.py:PlaybookViewSet.perform_destroy; apps/ops/api/playbook.py:PlaybookViewSet.perform_create; apps/ops/api/playbook.py:PlaybookFileBrowserAPIView.get; apps/ops/api/playbook.py:PlaybookFileBrowserAPIView.post; apps/ops/api/playbook.py:PlaybookFileBrowserAPIView.patch; apps/ops/api/playbook.py:PlaybookFileBrowserAPIView.delete,apps/ops/api/playbook.py:PlaybookViewSet.perform_destroy; apps/ops/api/playbook.py:PlaybookViewSet.perform_create; apps/ops/api/playbook.py:PlaybookFileBrowserAPIView.get; apps/ops/api/playbook.py:PlaybookFileBrowserAPIView.post; apps/ops/api/playbook.py:PlaybookFileBrowserAPIView.patch; apps/ops/api/playbook.py:PlaybookFileBrowserAPIView.delete,path traversal
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-30620,22;664,mindsdb/api/http/namespaces/file.py:File.put,mindsdb/api/http/namespaces/file.py:File.put,path traversal
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-35920,22;664,sanic/response.py:file; sanic/response.py:file_stream,sanic/response.py:file; sanic/response.py:file_stream,path traversal
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-35918,22;664,lib/streamlit/components/v1/components.py:ComponentRequestHandler.get,lib/streamlit/components/v1/components.py:ComponentRequestHandler.get,path traversal
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-23522,22;664,mindsdb/interfaces/storage/fs.py:S3FSStore.get,mindsdb/interfaces/storage/fs.py:S3FSStore.get,path traversal
+https://www.cve.org/CVERecord?id=CVE-2021-43775,22;664,aim/web/api/views.py:serve_static_files,aim/web/api/views.py:serve_static_files,path traversal
+https://www.cve.org/CVERecord?id=CVE-2021-41185,22;664,mycodo/mycodo_flask/routes_general.py:send_note_attachment; mycodo/mycodo_flask/routes_general.py:camera_img_return_path,mycodo/mycodo_flask/routes_general.py:send_note_attachment; mycodo/mycodo_flask/routes_general.py:camera_img_return_path,path traversal
+https://www.cve.org/CVERecord?id=CVE-2024-25722,89;707,qanything_kernel/qanything_server/handler.py:upload_weblink; qanything_kernel/qanything_server/handler.py:upload_files; qanything_kernel/qanything_server/handler.py:delete_knowledge_base; qanything_kernel/qanything_server/handler.py:rename_knowledge_base; qanything_kernel/qanything_server/handler.py:delete_docs; qanything_kernel/qanything_server/handler.py:clean_files_by_status; qanything_kernel/qanything_server/handler.py:local_doc_chat,qanything_kernel/connector/database/mysql/mysql_client.py:KnowledgeBaseManager.check_kb_exist; qanything_kernel/connector/database/mysql/mysql_client.py:KnowledgeBaseManager.check_file_exist_by_name; qanything_kernel/connector/database/mysql/mysql_client.py:KnowledgeBaseManager.get_knowledge_base_name; qanything_kernel/connector/database/mysql/mysql_client.py:KnowledgeBaseManager.delete_knowledge_base,sql injection
+https://www.cve.org/CVERecord?id=CVE-2024-4890,89;707,litellm/proxy/utils.py:PrismaClient:get_data,litellm/proxy/utils.py:PrismaClient:get_data,sql injection
+https://www.cve.org/CVERecord?id=CVE-2023-30605,89;707,sql/instance.py:param_edit,sql/instance.py:param_edit,sql injection
+https://www.cve.org/CVERecord?id=CVE-2023-30558,89;707,sql/data_dictionary.py:table_list,sql/data_dictionary.py:table_list,sql injection
+https://www.cve.org/CVERecord?id=CVE-2023-30557,89;707,sql/data_dictionary.py:table_info,sql/data_dictionary.py:table_info,sql injection
+89_DS-1,89,search_product,search_product,sql injection
+89_DS-2,89,get_employee_by_filter,get_employee_by_filter,sql injection
+89_DS-3,89,search_products,search_products,sql injection
+89_DS-4,89,search_cases,search_cases,sql injection
+89_DS-5,89,get_user_posts,get_user_posts,sql injection
+89_DS-6,89,AccountHandler.get,AccountHandler.get,sql injection
+89_DS-7,89,search_rooms,search_rooms,sql injection
+89_DS-8,89,LibrarySystem.search_books,LibrarySystem.search_books,sql injection
+89_DS-9,89,search_patient_records,search_patient_records,sql injection
+89_DS-10,89,search_tickets,search_tickets,sql injection
+89_DS-11,89,search_books,search_books,sql injection
+89_DS-12,89,search_books,search_books,sql injection
+89_DS-13,89,search_employees,search_employees,sql injection
+89_DS-14,89,search_users,search_users,sql injection
+89_DS-15,89,search_products,search_products,sql injection
+89_DS-16,89,search_users_view,search_users_view,sql injection
+89_DS-17,89,search_products,search_products,sql injection
+89_DS-18,89,LoginHandler.post,LoginHandler.post,sql injection
+89_DS-19,89,search_comments,search_comments,sql injection
+89_DS-20,89,ReportSystem.generate_report,ReportSystem.generate_report,sql injection
+https://www.cve.org/CVERecord?id=CVE-2024-41675,79;707,ckanext/datatablesview/blueprint.py:ajax,ckanext/datatablesview/blueprint.py:ajax,cross-site scripting
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-39863,79;707,airflow/www/views.py:ProviderView.list,airflow/www/views.py:ProviderView._clean_description,cross-site scripting
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-7008,79;707,src/calibre/srv/legacy.py:browse,src/calibre/srv/legacy.py:browse,cross-site scripting
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-5711,79;707,devika.py:project_files; src/apis/project.py:create_project; src/apis/project.py:delete_project; src/apis/project.py:download_project; src/apis/project.py:download_project_pdf,devika.py:project_files; src/apis/project.py:create_project; src/apis/project.py:delete_project; src/apis/project.py:download_project; src/apis/project.py:download_project_pdf,cross-site scripting
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-27494,79;707,lib/streamlit/components/v1/components.py:ComponentRequestHandler.get; lib/streamlit/server/routes.py:MediaFileHandler.validate_absolute_path,lib/streamlit/components/v1/components.py:ComponentRequestHandler.get; lib/streamlit/server/routes.py:MediaFileHandler.validate_absolute_path,cross-site scripting
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-6568,79;707,mlflow/server/auth/__init__.py:create_user; mlflow/server/handlers.py:search_datasets_handler; mlflow/server/handlers.py:create_promptlab_run_handler,mlflow/server/auth/__init__.py:create_user; mlflow/server/handlers.py:search_datasets_handler; mlflow/server/handlers.py:create_promptlab_run_handler,cross-site scripting
+https://www.cve.org/CVERecord?id=CVE-2022-39348,79;707,src/twisted/web/vhost.py:NameVirtualHost._getResourceForRequest,src/twisted/web/vhost.py:NameVirtualHost._getResourceForRequest,cross-site scripting
+https://www.cve.org/CVERecord?id=CVE-2022-24710,79;707,weblate/trans/views/reports.py:get_credits; weblate/trans/views/reports.py:get_counts,weblate/trans/views/reports.py:get_credits; weblate/trans/views/reports.py:get_counts,cross-site scripting
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-26947,79;707,addons/auth_signup/controllers/main.py:AuthSignupHome.web_auth_signup; addons/web/controllers/main.py:Home.web_login,addons/auth_signup/controllers/main.py:AuthSignupHome.web_auth_signup; addons/web/controllers/main.py:Home.web_login,cross-site scripting
+https://www.cve.org/CVERecord?id=CVE-2021-25963,79;707,shuup/admin/utils/urls.py:AdminRegexURLPattern._get_unauth_response; shuup/core/basket/command_dispatcher.py:BasketCommandDispatcher.handle; shuup/front/checkout/_process.py:CheckoutProcess.get_current_phase; shuup/front/urls.py:_not_here_yet; shuup/xtheme/views/command.py:command_dispatch; shuup/xtheme/views/editor.py:EditorView.post; shuup/xtheme/views/extra.py:extra_view_dispatch,shuup/admin/utils/urls.py:AdminRegexURLPattern._get_unauth_response; shuup/core/basket/command_dispatcher.py:BasketCommandDispatcher.handle; shuup/front/checkout/_process.py:CheckoutProcess.get_current_phase; shuup/front/urls.py:_not_here_yet; shuup/xtheme/views/command.py:command_dispatch; shuup/xtheme/views/editor.py:EditorView.post; shuup/xtheme/views/extra.py:extra_view_dispatch,cross-site scripting
+https://www.cve.org/CVERecord?id=CVE-2018-1000559,79;707,qutebrowser/browser/qutescheme.py:qute_history,qutebrowser/browser/qutescheme.py:history_data,cross-site scripting
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15635,79;707,addons/mail/wizard/invite.py:Invite.default_get,addons/mail/wizard/invite.py:Invite.default_get,cross-site scripting
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15634,79;707,addons/web/controllers/main.py:Binary.upload; addons/web/controllers/main.py:Binary.upload_attachment,addons/web/controllers/main.py:Binary.upload; addons/web/controllers/main.py:Binary.upload_attachment,cross-site scripting
